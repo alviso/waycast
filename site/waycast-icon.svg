@@ -1,0 +1,25 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waycast community icon — road converging to a casting beacon.
+       Palette = site: ground #101318, road #2A3140, dashes #E7ECF2,
+       signal #F59F00. Designed for Reddit's circular crop. -->
+  <rect width="512" height="512" fill="#101318"/>
+
+  <!-- road: perspective trapezoid, vanishing below the beacon -->
+  <polygon points="138,470 374,470 276,210 236,210" fill="#2A3140"/>
+  <!-- center dashes, tapering to the horizon -->
+  <g fill="#E7ECF2">
+    <polygon points="245,466 267,466 264,430 248,430"/>
+    <polygon points="249,402 263,402 261,372 251,372"/>
+    <polygon points="252,348 260,348 259,324 253,324"/>
+    <polygon points="254,304 258,304 257,286 255,286"/>
+  </g>
+
+  <!-- beacon above the vanishing point -->
+  <circle cx="256" cy="168" r="28" fill="#F59F00"/>
+  <!-- cast: 120-degree broadcast arcs -->
+  <g stroke="#F59F00" stroke-linecap="round">
+    <path fill="none" d="M 200.6 136 A 64 64 0 0 1 311.4 136" stroke-width="20"/>
+    <path fill="none" d="M 167.7 117 A 102 102 0 0 1 344.3 117" stroke-width="18" opacity="0.70"/>
+    <path fill="none" d="M 134.8 98 A 140 140 0 0 1 377.2 98" stroke-width="16" opacity="0.45"/>
+  </g>
+</svg>

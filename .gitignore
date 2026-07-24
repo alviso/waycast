@@ -1,0 +1,18 @@
+build/
+third_party/lvgl/
+.DS_Store
+
+# fetched OSM tiles (regenerate: scripts/fetch_demo_tiles.py)
+assets/tiles/
+# device tile subset (regenerate: scripts/make_device_tiles.py)
+assets_device/
+
+# ESP-IDF generated
+targets/esp32p4/build/
+targets/esp32p4/sdkconfig
+targets/esp32p4/sdkconfig.old
+targets/esp32p4/managed_components/
+targets/esp32p4/main/tile_server.h
+server/cache/
+assets_region/
+__pycache__/

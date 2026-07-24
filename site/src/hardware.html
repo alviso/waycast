@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Hardware — Waycast reference configurations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The three hardware roles a Waycast mesh is built from, and the exact configurations we run today.">
+<link rel="canonical" href="https://waycast.io/hardware.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/hardware.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/hardware.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Hardware — Waycast reference configurations">
+<meta property="og:description" content="The three hardware roles a Waycast mesh is built from, and the exact configurations we run today.">
+<meta property="og:url" content="https://waycast.io/hardware.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text)}
+  .links a.here{color:var(--signal)}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h1{font:700 clamp(28px,4.5vw,42px)/1.15 var(--sans);margin:10px 0 14px;
+     letter-spacing:-.01em;text-wrap:balance}
+  h2{font:700 22px/1.25 var(--sans);margin:0 0 10px}
+  p{max-width:66ch}
+  .muted{color:var(--muted)}
+  header.page{padding:64px 0 8px}
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  .role{display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:start}
+  @media(max-width:700px){.role{grid-template-columns:1fr}}
+  .chip{display:inline-block;font:700 12px/1 var(--mono);
+        letter-spacing:.08em;padding:7px 11px;border-radius:999px}
+  .chip.a{background:rgba(245,159,0,.14);color:var(--signal)}
+  .chip.t{background:rgba(12,166,120,.14);color:var(--local)}
+  .chip.i{background:rgba(92,124,250,.14);color:var(--info)}
+  .status{font:600 12px/1 var(--mono);letter-spacing:.06em;
+          color:var(--local);margin-left:10px}
+  .status.proto{color:var(--info)}
+  .parts{background:var(--panel);border:1px solid var(--line);
+         border-radius:12px;padding:18px 22px;margin:16px 0 0;
+         font:14px/1.9 var(--mono);color:var(--muted);list-style:none}
+  .parts li::before{content:"— ";color:var(--dim)}
+  .parts b{color:var(--text);font-weight:600}
+  img.proto{width:100%;max-width:520px;border:1px solid var(--line);
+            border-radius:12px;margin-top:16px;display:block}
+  .cap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);
+         font:13px/1.8 var(--mono);color:var(--dim)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+  img.proto{cursor:zoom-in}
+  #lightbox{position:fixed;inset:0;background:rgba(8,10,13,.94);
+    display:flex;align-items:center;justify-content:center;z-index:99;
+    cursor:zoom-out}
+  #lightbox img{max-width:96vw;max-height:94vh;border-radius:10px}
+</style>
+
+<nav class="top"><div class="navrow wrap">
+  <a class="brand" href="/">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.html">How it works</a>
+    <a class="here" href="/hardware.html">Hardware</a>
+    <a href="/journal.html">Journal</a>
+    <a href="/roadmap.html">Roadmap</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/hardware.hu.html" lang="hu" hreflang="hu">HU</a>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Hardware</div>
+  <h1>Three roles, three reference configurations</h1>
+  <p class="muted">A Waycast mesh is built from devices playing three
+     roles. These are not concept renders &mdash; each configuration
+     below is hardware we run today, listed exactly. Build guides and
+     firmware downloads arrive with the open release; until then this
+     page is the honest inventory.</p>
+</div></header>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip a">DRIVE</span></div>
+  <div>
+    <h2>The car device <span class="status">FIELD-PROVEN</span></h2>
+    <p>A windshield-class navigator that needs no network and no
+       account: offline street map, hazard overlay, two-tap reporting,
+       confirm/deny votes, and a local corkboard that unfolds when you
+       park. Everything it knows arrived by radio from other
+       participants.</p>
+    <ul class="parts">
+      <li><b>ESP32-P4 dev kit</b> with 7&Prime; 720&times;1280 touch panel</li>
+      <li><b>LoRa radio</b>: SX1262 HAT on the 40-pin header, or a
+          USB LoRa dongle &mdash; both profiles supported</li>
+      <li><b>GPS</b>: USB G-mouse receiver (NMEA)</li>
+      <li><b>Map storage</b>: microSD tile pack, or tiles embedded in
+          flash for a self-contained demo unit</li>
+    </ul>
+    <img class="proto" src="{{DEVDRIVE}}" alt="The Waycast device: 7-inch panel showing the driving view — live street map with route ribbon, a Slowdown warning 460 m ahead, and the Report button">
+    <div class="cap">the driving posture &mdash; offline map, the next
+         hazard ahead, one fixed Report button. Every item arrived by
+         radio.</div>
+    <img class="proto" src="{{DEVSQUARE}}" alt="The Waycast device showing the parked town square: a feed of notes — slowdown, lodging, farmers market, debris with confirmations, and a crash report">
+    <div class="cap">stopped, the town square opens &mdash; every note
+         alive on the mesh right now, each with its source, age, and
+         expiry. Gone when they expire, kept nowhere.</div>
+  </div>
+</div></div></section>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip t">ANCHOR</span></div>
+  <div>
+    <h2>The town node <span class="status">RUNNING 24/7</span></h2>
+    <p>A fixed node with a concentrator-class radio that hears every
+       spreading factor on multiple channels at once &mdash; the best
+       ears in the mesh. It relays traffic, and it injects public
+       information: today that means live National Weather Service
+       alerts for its area, polled from the public API and broadcast
+       with their real expiry times. It knows its own position and
+       keeps accurate time from GPS, so it stays trustworthy even with
+       the internet down.</p>
+    <ul class="parts">
+      <li><b>Raspberry Pi 4</b>, Raspberry Pi OS Lite</li>
+      <li><b>SX1302 LoRa concentrator HAT</b> (SPI) &mdash; widely
+          available LoRaWAN gateway hardware, given a second life</li>
+      <li><b>u-blox GPS</b> on the HAT &mdash; position + disciplined clock</li>
+      <li><b>Provisioning</b>: one script takes a fresh SD card to a
+          self-starting appliance &mdash; survives power cuts, needs no
+          keyboard, ever</li>
+    </ul>
+  </div>
+</div></div></section>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip i">ANNOUNCE</span></div>
+  <div>
+    <h2>The shop beacon <span class="status proto">PROTOTYPE</span></h2>
+    <p>A small station for a business or a community point: it serves
+       a local page where the owner writes what passersby should know
+       &mdash; opening hours, today&rsquo;s offer, &ldquo;we have
+       fuel&rdquo; &mdash; and announces it on the mesh so nearby
+       drivers see it on the corkboard. No platform, no account, no
+       fees: your announcement radiates from your own roof.</p>
+    <ul class="parts">
+      <li><b>Any Mac/PC</b> (Raspberry Pi version planned)</li>
+      <li><b>USB LoRa dongle</b> as the radio</li>
+      <li><b>Composer page</b> served locally &mdash; write once,
+          the mesh carries it</li>
+    </ul>
+  </div>
+</div></div></section>
+
+<footer><div class="wrap">
+  WAYCAST &middot; <a href="/">waycast.io</a> &middot; built in the open
+  &middot; hardware guides ship with the open release
+</div></footer>
+<script>
+document.querySelectorAll('img.proto').forEach(function (im) {
+  im.addEventListener('click', function () {
+    var lb = document.createElement('div'); lb.id = 'lightbox';
+    var big = document.createElement('img');
+    big.src = im.src; big.alt = im.alt;
+    lb.appendChild(big);
+    function close() { lb.remove(); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') close(); }
+    lb.addEventListener('click', close);
+    document.addEventListener('keydown', esc);
+    document.body.appendChild(lb);
+  });
+});
+</script>
+</html>

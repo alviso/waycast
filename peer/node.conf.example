@@ -1,0 +1,21 @@
+# Waycast town-node configuration -> /etc/waycast/node.conf
+# Read by both waycast-peer.service and waycast-injector.service.
+
+# Node location (the injector polls NWS for this point; the peer uses
+# it as its mesh position).
+NODE_LAT=45.52
+NODE_LON=-122.89
+
+# Town name — broadcast in the presence beacon, shown on devices
+# as the 'town near' indicator.
+NODE_NAME=Hillsboro
+
+# UDP inject listener port on loopback (peer listens, injector sends).
+#INJECT_PORT=7788
+
+# Injector cadence (seconds).
+#POLL_S=120
+#REFRESH_S=600
+
+# api.weather.gov requires a contact User-Agent.
+#NWS_UA=waycast-town-node/0.1 (waycast.io; ops@waycast.io)

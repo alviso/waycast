@@ -1,0 +1,24 @@
+services:
+  tiles:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - tile-cache:/data
+    expose:
+      - "8484"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  tile-cache:
+  caddy-data:
+  caddy-config:

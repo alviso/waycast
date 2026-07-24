@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="hu">
+<meta charset="utf-8">
+<title>Mérnöki napló — Waycast</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Dátumozott, őszinte építési jegyzetek a Waycast járműves mesh-ről — mi működött, mi állt ellen, mi jön.">
+<link rel="canonical" href="https://waycast.io/journal.hu.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/journal.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/journal.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Mérnöki napló — Waycast">
+<meta property="og:description" content="Dátumozott, őszinte építési jegyzetek a Waycast járműves mesh-ről — mi működött, mi állt ellen, mi jön.">
+<meta property="og:url" content="https://waycast.io/journal.hu.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap;
+          max-width:1000px;margin:0 auto}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text)}
+  .links a.here{color:var(--signal)}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h1{font:700 clamp(28px,4.5vw,42px)/1.15 var(--sans);margin:10px 0 14px}
+  header.page{padding:64px 0 8px}
+  article{padding:44px 0;border-top:1px solid var(--line)}
+  .date{font:600 12px/1 var(--mono);letter-spacing:.12em;color:var(--dim);
+        text-transform:uppercase}
+  article h2{font:700 24px/1.25 var(--sans);margin:8px 0 12px;
+             letter-spacing:-.01em;text-wrap:balance}
+  p{max-width:66ch}
+  .muted{color:var(--muted)}
+  .console{background:#0C0F13;border:1px solid var(--line);
+           border-radius:12px;padding:16px 20px;margin:18px 0;
+           font:13px/1.85 var(--mono);overflow-x:auto;color:var(--muted)}
+  .console .ok{color:var(--local)} .console .amber{color:var(--signal)}
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);
+         font:13px/1.8 var(--mono);color:var(--dim)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/index.hu.html">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.hu.html">Hogyan m&#369;k&ouml;dik</a>
+    <a href="/hardware.hu.html">Hardver</a>
+    <a class="here" href="/journal.hu.html">Napl&oacute;</a>
+    <a href="/roadmap.hu.html">&Uacute;titerv</a>
+    <a href="/contact.hu.html">Kapcsolat</a>
+    <a href="/journal.html" lang="en" hreflang="en">EN</a>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Mérnöki napló</div>
+  <h1>Építési jegyzetek, dátummal és őszintén</h1>
+  <p class="muted">Mi működött, mi állt ellen, és mire tanított.
+     A legfrissebb elöl. Ha itt egy állítás szerepel, az valódi
+     hardveren történt, a leírt napon.</p>
+</div></header>
+
+<article><div class="wrap">
+  <div class="date">2026&ndash;07&ndash;21</div>
+  <h2>A városi csomópont megtanulja, hol van és mennyi az idő</h2>
+  <p>A koncentrátor HAT-en u-blox GPS ül, így a városi csomópont
+     mostantól induláskor magától megállapítja a pozícióját &mdash; és
+     szépen visszaáll a beállított helyre, amíg hideg az ég. Ugyanez a
+     javítás az órát is fegyelmezi (<span class="muted">gpsd +
+     chrony</span>): interneten az NTP nyer; offline a GPS viszi az
+     időt egyedül. Ez utóbbi fontosabb, mint amilyennek hangzik &mdash;
+     ebben a mesh-ben minden üzenetnek lejárata van, és egy
+     katasztrófa-üzemmódú, internet nélküli csomópontnak is pontosan
+     tudnia kell, mennyi az idő.</p>
+  <p class="muted">Csapda útitársaknak: a mai Raspberry Pi OS-en a
+     bejelentkezési konzol alapból magáénak tudja az UART-ot, és
+     login-promptokkal bombázza a GPS-t &mdash; a GPS pedig minden
+     egyeset udvarias &bdquo;ismeretlen üzenet&rdquo; panasszal
+     válaszol meg. Előbb lakoltasd ki a konzolt, mielőtt a
+     kábelezésben kételkedsz.</p>
+</div></article>
+
+<article><div class="wrap">
+  <div class="date">2026&ndash;07&ndash;20</div>
+  <h2>Mindkét irány, egyetlen estén</h2>
+  <p>A mérföldkő, ami felé építkeztünk: a vezető megnyomja a
+     <em>Jelentés</em> gombot az autós eszközön, és a keret
+     dekódolódik a városi csomópont koncentrátorán &mdash; majd a
+     városi csomópont veszélyjelzést sugároz, és az megjelenik az autó
+     képernyőjén. Mindkét szint, mindkét irány, éteren át
+     915&nbsp;MHz-en, elsőre, amint a rádió életre kelt.</p>
+  <div class="console">[rx OK ] Crash  01E1902F/1  hops=0  rssi=-46  snr=9.2  &hellip;  "your report"<br>
+  <span class="amber">[inject] tx Weather sev2 &hellip; ttl=6272s "Heat Advisory"</span><br>
+  <span class="ok">&mdash; valódi National Weather Service riasztás, a mesh hátán</span></div>
+  <p>A városi csomópont maga egy használt LoRaWAN átjáró új
+     munkakörben &mdash; egy Raspberry Pi SX1302 koncentrátorral. Az
+     életre keltés dokumentálásra érdemes küzdelem volt: a gyári
+     reset-szkript a mai OS-kiadásokon némán nem csinál semmit (a régi
+     GPIO-felület eltűnt), a referencia-HAL pedig el sem indul egy
+     hőszenzor nélkül, amely ezen a lapon nincs is. Mindkét javítás
+     apró, egyik sem kitalálható. A telepítőszkriptünkben szállítjuk
+     őket.</p>
+  <p class="muted">Bónusz-rejtély megoldva: az autós rádiónk adása
+     két hétig halottnak tűnt. A koncentrátor azonnal, tisztán és
+     hangosan hallotta &mdash; a teszteléshez használt USB adapterek
+     némán eldobnak minden keretet, amely nem a saját, zárt
+     rádióformátumukban érkezik. Az adó sosem volt rossz; a tanú volt
+     süket.</p>
+</div></article>
+
+<article><div class="wrap">
+  <div class="date">2026&ndash;07&ndash;19</div>
+  <h2>Az autós eszköz fület kap</h2>
+  <p>Az autós eszköz SX1262 rádió-HAT-je mostantól tisztán vesz az
+     éteren át. A kulcs az antennakapcsoló volt: két vezérlővonalát
+     <em>komplementer</em> módon kell hajtani, és minden kézenfekvő
+     &bdquo;mindkettő magas&rdquo; vagy &bdquo;mindkettő
+     alacsony&rdquo; állapot tervezetten néma. Egyetlen
+     polaritásjavítás a vételt az alig-áthallásból teljes
+     jelerősségre vitte.</p>
+  <p class="muted">Szintén a nehezen szerzett tudás polcára: a HAT
+     rajza és a fejlesztőkit fejléc-rajza ellentétes irányban számozza
+     a tűoszlopokat. Két munkamenetnyi szellem, egyetlen tükrözés.</p>
+</div></article>
+
+<article><div class="wrap">
+  <div class="date">2026&ndash;07&ndash;13</div>
+  <h2>Az első éteren áti mesh</h2>
+  <p>Egy asztali társeszközön jelentett veszély megjelent az autós
+     eszköz térképén &mdash; rádió vitte, nem kábeltrükk. Ugyanaz a
+     geo-mulandó elárasztási mag fut az eszközön, mint a
+     szimulátorunkban, és a szimulátorszámok az éterben is kitartottak:
+     egy 150 csomópontos szimulált városban egy jelentés a releváns
+     csomópontok 98,9%-át eléri úgy, hogy minden csomópont legfeljebb
+     egyszer ad.</p>
+  <p class="muted">Protokoll-életjelek: 29 bájtos, verziózott keretek
+     plusz opcionális rövid jegyzet; csomópontonként egy késleltetett
+     ismétlés, aztán csend; a relevancia-sugár és a lejárat minden
+     keretben utazik. Semmi sem tárolódik, semmi sem útválasztódik,
+     senki sincs megcímezve.</p>
+</div></article>
+
+<footer><div class="wrap">
+  WAYCAST &middot; <a href="/index.hu.html">waycast.io</a> &middot; nyíltan építve
+</div></footer>
+</html>

@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="hu">
+<meta charset="utf-8">
+<title>Waycast — nyílt, infrastruktúra-független autós mesh-hálózat</title>
+<link rel="alternate" hreflang="en" href="https://waycast.io/">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/index.hu.html">
+<link rel="alternate" hreflang="x-default" href="https://waycast.io/">
+<link rel="canonical" href="https://waycast.io/index.hu.html">
+<meta name="description" content="A Waycast nyílt, hálózatfüggetlen járműves mesh: veszélyjelzések, városi faliújság és katasztrófa-rádió egyetlen dobozban. Az autók apró, mulandó üzeneteket adnak át LoRa rádión — fiók, SIM és szerver nélkül.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Waycast — nyílt, infrastruktúra-független autós mesh-hálózat">
+<meta property="og:description" content="A Waycast nyílt, hálózatfüggetlen járműves mesh: veszélyjelzések, városi faliújság és katasztrófa-rádió egyetlen dobozban. Az autók apró, mulandó üzeneteket adnak át LoRa rádión — fiók, SIM és szerver nélkül.">
+<meta property="og:url" content="https://waycast.io/index.hu.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h2{font:700 clamp(24px,3.4vw,32px)/1.2 var(--sans);margin:10px 0 14px;
+     letter-spacing:-.01em;text-wrap:balance}
+  p{max-width:62ch}
+  .muted{color:var(--muted)}
+  section{padding:72px 0;border-top:1px solid var(--line)}
+
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap;
+          max-width:1000px;margin:0 auto}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text);text-decoration:none}
+
+  /* ---- hero ---- */
+  header.wrap{padding:64px 24px 0}
+  .mark{font:800 clamp(44px,8vw,84px)/1 var(--sans);
+        letter-spacing:.06em;margin:14px 0 6px}
+  .mark .cast{color:var(--signal)}
+  .thesis{font-size:clamp(17px,2.2vw,21px);color:var(--text);
+          max-width:34ch;text-wrap:balance;margin:12px 0 6px;
+          font-weight:550}
+  .sub{color:var(--muted);max-width:52ch}
+  .ctas{display:flex;gap:14px;margin:26px 0 8px;flex-wrap:wrap}
+  .btn{display:inline-block;padding:11px 20px;border-radius:8px;
+       font:600 14px/1 var(--sans)}
+  .btn.primary{background:var(--signal);color:#181000}
+  .btn.primary:hover{text-decoration:none;filter:brightness(1.08)}
+  .btn.ghost{border:1px solid var(--line);color:var(--text)}
+  .btn.ghost:hover{text-decoration:none;border-color:var(--dim)}
+  #air{display:block;width:100%;height:300px;margin-top:38px;
+       border:1px solid var(--line);border-radius:14px;background:#0C0F13}
+  .aircap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  .airline{font:500 15px/1.5 var(--sans);color:var(--text);min-height:24px;margin-top:14px}
+  .airticker{background:#0C0F13;border:1px solid var(--line);border-radius:10px;
+    margin-top:12px;padding:10px 14px;font:12px/1.75 var(--mono);
+    height:125px;overflow:hidden;display:flex;flex-direction:column;
+    justify-content:flex-end}
+  .airticker div{flex:0 0 auto;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis}
+  .airticker .tx{color:#FF6B6B}  .airticker .rly{color:var(--muted)}
+  .airticker .sup{color:var(--dim)} .airticker .att{color:var(--local)}
+  .airticker .loc{color:var(--local)} .airticker .exp{color:var(--dim);font-style:italic}
+
+  #demo video{display:block;width:100%;border:1px solid var(--line);
+       border-radius:14px;background:#0C0F13;margin-top:26px}
+  .vt{font-family:var(--mono);color:var(--signal);font-size:.92em}
+  .lang{position:absolute;top:26px;right:24px;font:600 12px/1 var(--mono);
+        letter-spacing:.1em}
+  header{position:relative}
+
+  /* ---- channels ---- */
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+        gap:16px;margin-top:26px}
+  .card{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:22px}
+  .chip{display:inline-block;font:700 12px/1 var(--mono);
+        letter-spacing:.08em;padding:7px 11px;border-radius:999px;
+        margin-bottom:14px}
+  .chip.a{background:rgba(245,159,0,.14);color:var(--signal)}
+  .chip.t{background:rgba(12,166,120,.14);color:var(--local)}
+  .chip.r{background:rgba(224,49,49,.14);color:#FF6B6B}
+  .card h3{margin:0 0 8px;font-size:18px}
+  .card p{margin:0;color:var(--muted);font-size:15px}
+
+  /* ---- console ---- */
+  .console{background:#0C0F13;border:1px solid var(--line);
+           border-radius:12px;padding:22px 24px;margin-top:26px;
+           font:13.5px/1.9 var(--mono);overflow-x:auto}
+  .console .t{color:var(--dim)}
+  .console .rx{color:var(--info)}
+  .console .amber{color:var(--signal)}
+  .console .ok{color:var(--local)}
+  .console .fade{color:var(--dim);font-style:italic}
+  .how{display:grid;grid-template-columns:1fr 1fr;gap:32px;
+       align-items:start}
+  @media(max-width:760px){.how{grid-template-columns:1fr}}
+
+  /* ---- radios table ---- */
+  table{border-collapse:collapse;width:100%;margin-top:26px;
+        font-variant-numeric:tabular-nums}
+  td{padding:13px 16px;border-top:1px solid var(--line);font-size:15px}
+  tr:first-child td{border-top:none}
+  td.radio{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+  td.state{text-align:right;font:600 13px var(--mono);white-space:nowrap}
+  .on{color:var(--local)} .off{color:var(--dim)} .none{color:var(--signal)}
+  .tablebox{background:var(--panel);border:1px solid var(--line);
+            border-radius:12px;overflow:hidden}
+  @media(max-width:680px){
+    table{display:block}
+    tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;
+       padding:12px 16px;border-top:1px solid var(--line)}
+    tr:first-child{border-top:none}
+    td{display:block;padding:0;border-top:none}
+    td.radio{order:1;flex:1;white-space:normal}
+    td.state{order:2;text-align:right}
+    td:nth-child(2){order:3;flex-basis:100%;color:var(--muted);
+       font-size:14px}
+  }
+  .quote{margin:22px 0 0;padding-left:16px;border-left:3px solid var(--signal);
+         color:var(--text);font-size:17px;max-width:52ch}
+
+  /* ---- status ---- */
+  .status{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+          gap:36px;align-items:center}
+  @media(max-width:760px){.status{grid-template-columns:1fr}}
+  .status img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+  .cap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  ul.done{list-style:none;margin:18px 0 0;padding:0}
+  ul.done li{padding:7px 0 7px 26px;position:relative;color:var(--muted);
+             font-size:15px}
+  ul.done li::before{content:"";position:absolute;left:2px;top:14px;
+        width:8px;height:8px;border-radius:99px;background:var(--local)}
+  ul.done li.next::before{background:var(--signal)}
+  ul.done li strong{color:var(--text);font-weight:600}
+
+  footer{padding:56px 0 72px;border-top:1px solid var(--line);
+         color:var(--dim);font:13px/1.8 var(--mono)}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;
+               flex-wrap:wrap}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.hu.html">Hogyan m&#369;k&ouml;dik</a>
+    <a href="/hardware.hu.html">Hardver</a>
+    <a href="/journal.hu.html">Napl&oacute;</a>
+    <a href="/roadmap.hu.html">&Uacute;titerv</a>
+    <a href="/contact.hu.html">Kapcsolat</a>
+    <a href="/" lang="en" hreflang="en">EN</a>
+  </div>
+</div></nav>
+
+<header class="wrap">
+  <div class="eyebrow">Nyílt, infrastruktúra-független autós mesh-hálózat</div>
+  <div class="mark">WAY<span class="cast">CAST</span></div>
+  <p class="thesis">Veszélyjelzés, mint a Waze. A város faliújságja.
+     Katasztrófarádió. Egyetlen doboz a műszerfalon.</p>
+  <p class="sub">Nincs fiók. Nincs SIM-kártya. Nincs szerver. Az autók
+     apró, rövid életű, helyi üzeneteket adnak át egymásnak LoRa rádión —
+     és az információ magától elhal, amint már nem igaz.</p>
+  <div class="ctas">
+    <a class="btn primary" href="/contact.hu.html">Írj nekünk</a>
+    <a class="btn ghost" href="#status">Nézd meg a prototípust</a>
+  </div>
+  <canvas id="air" aria-label="Animáció: veszélyjelzés terjed rádión két jármű között"></canvas>
+  <div class="airline" id="airline">egy koppintás — a jelzés a levegőben van</div>
+  <div class="airticker" id="airticker" aria-hidden="true"></div>
+  <div class="aircap">915 MHz &middot; LoRa SF7/125k &middot; egy veszélyjelzés 29 bájt &middot; minden eszköz egyszer ismétli, aztán csend &middot; <b>koppints a térképre, és jelents te magad</b></div>
+</header>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="eyebrow">A demó</div>
+    <h2>Egy út, két részlet</h2>
+    <p class="muted">A szimulátor pontosan azt a firmware-t futtatja, ami
+       az eszközön fut &mdash; ugyanaz a térkép, ugyanaz a mesh-logika,
+       ugyanaz a képernyő, valódi cupertinói útvonalon. Első részlet:
+       <span class="vt">0:11</span>-nél megérkezik a mesh-ről a
+       törmelékjelzés, <span class="vt">0:36</span>-nál egy másik autó megerősíti
+       (majd egy második is). Második: ráfordulás a Homestead útra, egy ködjelzés,
+       amit a mesh leszavazott &mdash; és parkolás után a kinyíló helyi faliújság.</p>
+    <video controls muted playsinline preload="metadata"
+           poster="{{POSTER}}" src="{{VIDEO}}"
+           aria-label="Képernyőfelvétel a Waycast vezetési felületéről"></video>
+  </div>
+</section>
+
+<section id="channels">
+  <div class="wrap">
+    <div class="eyebrow">Mi utazik a mesh-en</div>
+    <h2>Háromféle üzenet, egyetlen rádió</h2>
+    <div class="cols">
+      <div class="card">
+        <span class="chip a">BIZTONSÁG &middot; vezetés közben</span>
+        <h3>Törmelék &mdash; 400 m</h3>
+        <p>Baleset, torlódás, jeges út. Az előtted haladó autó két
+           érintéssel jelenti, és minden képernyőről eltűnik, amint
+           lejár. A többi sofőr megerősíti vagy vitatja &mdash; a
+           megerősítés meghosszabbítja az életét, a kétely elhalványítja.</p>
+      </div>
+      <div class="card">
+        <span class="chip t">HELYI &middot; parkolva</span>
+        <h3>2 szabad szoba &mdash; Cupertino Inn</h3>
+        <p>A város faliújságja: események, szállás, üzemanyag, étel.
+           Sebességhez kötött, így a csevej sosem versenyez egy
+           balesetjelzéssel &mdash; állj félre, és kinyílik a helyi
+           réteg.</p>
+      </div>
+      <div class="card">
+        <span class="chip r">VÉSZHELYZET &middot; amikor számít</span>
+        <h3>Víz + elsősegély &mdash; De Anza</h3>
+        <p>Amikor a mobilhálózat leáll, ez a hálózat észre sem veszi.
+           Egy fix jeladó a segélyponton, a boltban vagy a kempingben
+           minden elhaladó autónak sugároz. Pont ez a lényeg.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow">Hogyan működik</div>
+    <h2>Nincs útvonalválasztás. Nincs fiók. A hálózatot a földrajz szervezi.</h2>
+    <div class="how">
+      <div>
+        <p class="muted">Minden üzenet hordozza, hol történt, mekkora
+           körzetben számít, és meddig érvényes. Az autó,
+           amelyik hallja, egyszer továbbadja &mdash; ha még friss, és
+           még a relevancia-sugáron belül jár. A távolodó autók egyszerűen
+           kimaradnak belőle. Az áradat önmagát korlátozza.</p>
+        <p class="muted">Az üzenetnek nincs címzettje. Semmit sem tárol
+           központi szerver. Autópályás tempónál, szembejövő forgalomban
+           nincs útvonaltábla, amit karban kellene tartani &mdash; mert
+           útvonalak nincsenek is. Ezért elég az a két másodperc is,
+           amíg a szembejövő autó rádiókapcsolatban van.</p>
+        <p class="muted">A szavazatok ugyanígy utaznak: a <em>megerősítve</em>
+           meghosszabbítja a jelentés életét, a <em>nincs&nbsp;ott</em>
+           megrövidíti. A mesh úgy moderálja magát, mint egy falu &mdash;
+           a hazugság nem jut túl a kitalálója hallótávolságán.</p>
+      </div>
+      <div class="console" role="img" aria-label="Konzolnapló: egy veszélyjelzés életútja">
+<span class="t">14:02:11</span> <span class="amber">HAZARD</span> debris sev2 @37.3302,-122.0352 r=3km ttl=10m<br>
+<span class="t">14:02:11</span> <span class="rx">TX</span>&nbsp;&nbsp;29 bájtos keret &middot; egy adásidő-szelet<br>
+<span class="t">14:02:13</span> <span class="rx">RLY</span> node 8A41 továbbítás &middot; 2. ugrás<br>
+<span class="t">14:02:14</span> <span class="rx">RLY</span> node C7F0 továbbítás &middot; 2. ugrás &middot; duplikátum eldobva &times;3<br>
+<span class="t">14:04:40</span> <span class="ok">ATT</span> megerősítve &times;2 &rarr; ttl +25%<br>
+<span class="t">14:09:02</span> <span class="t">RLY</span> node 22B9 a sugáron kívül &rarr; csendben marad<br>
+<span class="t">14:14:52</span> <span class="fade">EXP</span> <span class="fade">lejárt &mdash; mindenhol elfelejtve. nincs archívum, nincs előzmény.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="offgrid">
+  <div class="wrap">
+    <div class="eyebrow">Bizonyíthatóan hálózatfüggetlen</div>
+    <h2>Egy app ígérhet. A hardver bizonyít.</h2>
+    <p class="muted">Egy telefonos app „csak helyi" ígéretét nem tudod
+       ellenőrizni. A Waycast dedikált eszköz, ismert és auditálható
+       rádiókkal &mdash; a firmware pedig nyílt forráskódú, így az
+       ígéret mindkét fele átvizsgálható. Koppints a rádió ikonjára az
+       eszközön, és élőben ezt mutatja:</p>
+    <div class="tablebox">
+      <table>
+        <tr><td class="radio">LoRa (915 MHz)</td>
+            <td>a mesh &mdash; minden kizárólag így érkezik</td>
+            <td class="state on">AKTÍV</td></tr>
+        <tr><td class="radio">Bluetooth LE</td>
+            <td>opcionális telefonkapcsolat, semmi más</td>
+            <td class="state off">OFF</td></tr>
+        <tr><td class="radio">Wi-Fi</td>
+            <td>csak frissítéshez, a felhasználó kapcsolja be</td>
+            <td class="state off">OFF</td></tr>
+        <tr><td class="radio">Mobilhálózat</td>
+            <td>nincs modem, nincs SIM-foglalat, nincs kapcsolat szolgáltatóval</td>
+            <td class="state none">NINCS &mdash; SZÁNDÉKOSAN</td></tr>
+      </table>
+    </div>
+    <p class="quote">Minden, amit ez az eszköz tud, autóról autóra
+       terjedve érkezett hozzá. Fizikailag képtelen megfigyelni téged, és egy
+       szolgáltatáskiesés sem tudja lekapcsolni.</p>
+  </div>
+</section>
+
+<section id="status">
+  <div class="wrap">
+    <div class="eyebrow">Állapot &middot; 2026. július</div>
+    <h2>Nem pitch deck. Egy működő navigátor.</h2>
+    <div class="status">
+      <div>
+        <img src="{{PHOTO}}" alt="A Waycast felület: élő térkép, útakadály-figyelmeztetés, és egy helyi piac válaszol a mesh-en át" width="1280" height="720">
+        <div class="cap">a felület ma &mdash; útakadály 60&nbsp;km/h-nál, és egy
+        termelői piac válaszol a &bdquo;ma?&rdquo; kérdésre a mesh-en át
+        (szimulátor-kép &mdash; az eszköz pontosan ezt a kódot futtatja;
+        <a href="howitworks.html">így működik a mesh</a>)</div>
+      </div>
+      <div>
+        <ul class="done">
+          <li><strong>Vezetési felület hardveren</strong> &mdash; offline
+              térkép, görgetés/nagyítás, veszély-réteg, kétérintéses
+              jelentés</li>
+          <li><strong>HELYI csatorna</strong> &mdash; sebességhez kötött
+              faliújság, türkiz jelölők, parkolva böngészhető</li>
+          <li><strong>Bizalmi réteg v0</strong> &mdash; megerősítés/vitatás,
+              TTL-hosszabbítás, kétely-halványítás</li>
+          <li><strong>Rádióprotokoll</strong> &mdash; 29 bájtos, verziózott
+              keretek, tesztelve, rádióra készen</li>
+          <li><strong>R&aacute;di&oacute; bizony&iacute;tva</strong> &mdash;
+              aut&oacute;s eszk&ouml;z &harr; v&aacute;rosi csom&oacute;pont,
+              mindk&eacute;t ir&aacute;nyban, 915&nbsp;MHz-en (j&uacute;l.&nbsp;20.)</li>
+          <li><strong>V&aacute;rosi csom&oacute;pont &eacute;lesben</strong> &mdash;
+              mag&aacute;t&oacute;l indul&oacute; k&eacute;sz&uuml;l&eacute;k GPS
+              id&#337;vel/pozicion&aacute;l&aacute;ssal, val&oacute;s
+              meteorol&oacute;giai riaszt&aacute;sokat sug&aacute;roz</li>
+          <li class="next"><strong>Nyílt kiadás</strong> &mdash; GPL firmware
+              + nyílt protokoll-spec, amint a mesh-demó megáll a saját lábán</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>WAYCAST &middot; waycast.io &middot; nyíltan épül</div>
+    <div>firmware: GPLv3 (tervezett) &middot; protokoll: nyílt spec &middot; először US915</div>
+  </div>
+</footer>
+
+<script>
+window.AIR_CAPS = [
+  [0,'egy koppint\u00e1s \u2014 \u00e9s a veszélyjelzés a levegőben van'],
+  [1100,'hatótávon belül minden autó hallja \u2014 a szembejövő is, két másodperc alatt'],
+  [2600,'a legtávolabbi ismétli először \u2014 a hír kifelé száguld'],
+  [4400,'aki már hallotta, hallgat \u2014 nincs visszhang'],
+  [7000,'csak ott terjed, ahol számít \u2014 a körzet a keretben utazik'],
+  [11500,'egy arra járó megerősíti \u2014 a jelentés időt nyer'],
+  [17000,'egy bolt a nyugodt csatornán hirdet \u2014 a város faliújságja'],
+  [24000,'frissítés nélkül lejár \u2014 az út tervezetten felejt'],
+];
+</script>
+<script>
+{{AIRJS}}
+</script>
+

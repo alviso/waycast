@@ -1,0 +1,103 @@
+# vehicular-mesh esp32p4 target defaults
+
+CONFIG_IDF_TARGET="esp32p4"
+
+# -O2: IDF defaults to -Og; PNG inflate + pixel conversion need speed.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# Dev builds: full backtraces on panic (small perf cost, phase-0 only).
+# Frame pointers grow the bootloader past the default 0x8000 partition-
+# table offset -> table moved to 0x10000 (see partitions.csv).
+CONFIG_ESP_SYSTEM_USE_FRAME_POINTER=y
+CONFIG_PARTITION_TABLE_OFFSET=0x10000
+
+# Peter's kit: 7" 720x1280 DSI panel (BSP default is a 2.1" round one).
+CONFIG_BSP_LCD_TYPE_720_1280_7_INCH_A=y
+
+# Peter's dev kit has early (v1.0) P4 silicon; IDF v5.5 defaults to
+# requiring the v3.1 mass-production revision and refuses to flash.
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_ESP32P4_REV_MIN_100=y
+
+# The module has 16 MB NOR flash (BSP/IDF default assumes 2 MB).
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# OTA (docs/OTA.md): A/B app slots in partitions.csv; a freshly-OTA'd
+# app boots pending-verify and must pass the self-check gate in main.c
+# (esp_ota_mark_app_valid_cancel_rollback) or the bootloader reverts —
+# a bad flash cannot brick a device we can't easily recover from a car.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# Fonts the UI uses (LVGL is configured via Kconfig on this target,
+# not the repo-root lv_conf.h — that file is SDL-target only).
+CONFIG_LV_FONT_MONTSERRAT_12=y
+CONFIG_LV_FONT_MONTSERRAT_14=y
+CONFIG_LV_FONT_MONTSERRAT_16=y
+CONFIG_LV_FONT_MONTSERRAT_20=y
+CONFIG_LV_FONT_MONTSERRAT_28=y
+
+# 32 MB PSRAM module on the DEV-KIT; map framebuffers there.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_200M=y
+
+# Larger main task stack: LVGL + JSON parse at startup.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# USB-A ports sit behind a CH334F hub on the P4's one OTG port —
+# host-side external-hub support is required to see anything.
+CONFIG_USB_HOST_HUBS_SUPPORTED=y
+
+# the usb_host_vcp component is written with C++ exceptions.
+CONFIG_COMPILER_CXX_EXCEPTIONS=y
+
+# LVGL on the system allocator (decoded 256KB tiles overflow LVGL's
+# builtin 64KB pool -> every tile decode fails + retries each frame,
+# pegging taskLVGL until the watchdog fires). With SPIRAM_USE_MALLOC,
+# large allocations land in the 32MB PSRAM.
+CONFIG_LV_USE_CLIB_MALLOC=y
+
+# Rotate via the P4's PPA (hardware pixel engine) instead of software —
+# the port's default sw-rotation is far too slow for full-screen redraws.
+CONFIG_LVGL_PORT_ENABLE_PPA=y
+
+# On-screen FPS/CPU overlay while we tune display performance.
+CONFIG_LV_USE_PERF_MONITOR=y
+
+# Map tiles are decoded by vendored upstream lodepng into PSRAM buffers
+# (LVGL's bundled decoder mis-decodes palette PNGs + re-decodes per
+# frame). LVGL's own PNG/FS/cache stay off.
+
+# Console stays on the default UART0 (primary) + USB-Serial-JTAG
+# (secondary echo — the port we actually monitor). Moving the PRIMARY
+# console to USB-Serial-JTAG hard-hangs the 2nd-stage bootloader on
+# this v1.0 silicon (silent boot loop after the ROM banner). The GNSS
+# HAT still gets GPIO37/38: gps_uart.c routes them to UART1 via the
+# GPIO matrix at runtime, which quietly disconnects the idle console
+# UART pins. (Boot spew at 115200 into the L76K RX is harmless.)
+
+# esp_hosted's SDIO mempool must live in PSRAM: internal DMA-capable
+# heap is only ~67 KB on the P4 (p4-netdisplay finding).
+CONFIG_ESP_HOSTED_MEMPOOL_PREFER_SPIRAM=y
+
+# C6 reset polarity: ACTIVE_HIGH is what actually resets the C6 on
+# this kit (a stale sdkconfig generated against esp_hosted 3.0 kept
+# ACTIVE_LOW -> SDIO 0x107 timeouts, Wi-Fi dead).
+CONFIG_ESP_HOSTED_SDIO_RESET_ACTIVE_HIGH=y
+
+# NOTE July 25: LCD_DSI_ISR_CACHE_SAFE looked like the OTA-flicker cure
+# but BRICKED BOOT (v0.4.5, first real rollback save) — it requires all
+# display callbacks in IRAM, and esp_lvgl_port's live in flash. Flicker
+# is instead handled by freezing the UI to a static screen during the
+# download (fw_update pauses LVGL rendering; static framebuffer streams
+# from PSRAM untouched by flash stalls).
+
+# OTA-flicker attempt #3 (July 25): the DSI pipeline underruns whenever
+# a flash erase disables the cache (~40ms ISR blackouts on a ~1s beat
+# during downloads; content-independent — a fully static shroud still
+# flickered). Auto-suspend shrinks each stall to microseconds by
+# suspending the erase whenever the CPU needs cache. Runtime-gated by
+# flash-chip support; unsupported chip = no change. The display-side
+# fix (LCD_DSI_ISR_CACHE_SAFE) bricked boot — see note above.
+CONFIG_SPI_FLASH_AUTO_SUSPEND=y

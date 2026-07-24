@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<title>How Waycast works — the mesh, visualized</title>
+<meta name="description" content="How the Waycast mesh works, visualized: one tap puts a hazard on the air, every car in range hears it, the farthest repeats first, and the message expires on its own. No towers, no servers.">
+<link rel="canonical" href="https://waycast.io/howitworks.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/howitworks.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/howitworks.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="How Waycast works — the mesh, visualized">
+<meta property="og:description" content="How the Waycast mesh works, visualized: one tap puts a hazard on the air, every car in range hears it, the farthest repeats first, and the message expires on its own. No towers, no servers.">
+<meta property="og:url" content="https://waycast.io/howitworks.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --bg: #14161B; --panel: #1A1D23; --ink: #E9ECEF; --dim: #868E96;
+    --green: #51CF66; --amber: #F59F00; --red: #FF6B6B; --teal: #0CA678;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 32px 16px;
+  }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .sub { color: var(--dim); margin-bottom: 24px; }
+  #wrap { width: min(920px, 96vw); }
+  canvas {
+    width: 100%; aspect-ratio: 16 / 9; display: block;
+    background: var(--panel); border-radius: 12px;
+  }
+  #caption {
+    text-align: center; min-height: 56px; padding: 14px 8px 0;
+    font-size: 18px; color: var(--ink); transition: opacity .4s;
+  }
+  #caption b { color: var(--green); }
+  .legend {
+    display: flex; gap: 22px; justify-content: center; flex-wrap: wrap;
+    color: var(--dim); font-size: 13px; margin-top: 10px;
+  }
+  .legend span::before {
+    content: "●"; margin-right: 6px;
+  }
+  .l-car::before  { color: #5C7CFA; }
+  .l-hz::before   { color: var(--red); }
+  .l-bcn::before  { color: var(--teal); }
+  nav.top{width:100%;border-bottom:1px solid #262C36;margin:-32px -16px 28px;
+    padding:0 16px;box-sizing:content-box}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 8px;gap:16px;flex-wrap:wrap;max-width:1000px;margin:0 auto}
+  .brand{font-weight:800;font-size:18px;letter-spacing:.06em;
+    color:var(--ink);text-decoration:none}
+  .brand .cast{color:var(--amber)}
+  .links{display:flex;gap:18px;font:600 13px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .links a{color:var(--dim);text-decoration:none}
+  .links a:hover{color:var(--ink)}
+  .links a.here{color:var(--amber)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+</head>
+<body>
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a class="here" href="/howitworks.html">How it works</a>
+    <a href="/hardware.html">Hardware</a>
+    <a href="/journal.html">Journal</a>
+    <a href="/roadmap.html">Roadmap</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/howitworks.hu.html" lang="hu" hreflang="hu">HU</a>
+  </div>
+</div></nav>
+<h1>No towers. No servers. Cars talking to cars.</h1>
+<div class="sub">This is the actual Waycast algorithm — slowed down so you can watch it think.</div>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+  <div id="caption">A hazard is reported…</div>
+  <div class="legend">
+    <span class="l-car">cars</span>
+    <span class="l-hz">hazard report</span>
+    <span class="l-bcn">place beacon (shop, weather post)</span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const cap = document.getElementById('caption');
+  const ctx = cv.getContext('2d');
+  let W, H, DPR;
+
+  function resize() {
+    DPR = window.devicePixelRatio || 1;
+    W = cv.clientWidth; H = cv.clientWidth * 9 / 16;
+    cv.width = W * DPR; cv.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const RANGE = () => W * 0.21;        // radio range
+  const RADIUS = () => W * 0.46;       // relevance radius (msg dies past it)
+
+  // ---- world: cars on gentle orbits + fixed beacons ----
+  const N = 15;
+  const nodes = [];
+  /* grid-jittered placement: even coverage, no clumps */
+  const cells = [];
+  for (let gx = 0; gx < 5; gx++)
+    for (let gy = 0; gy < 3; gy++) cells.push([gx, gy]);
+  for (let i = cells.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cells[i], cells[j]] = [cells[j], cells[i]];
+  }
+  for (let i = 0; i < N; i++) {
+    const fixed = i >= N - 2; // last two are place beacons
+    const [gx, gy] = cells[i];
+    nodes.push({
+      fixed,
+      cx: 0.10 + (gx + 0.25 + 0.5 * Math.random()) * 0.80 / 5,
+      cy: 0.12 + (gy + 0.25 + 0.5 * Math.random()) * 0.76 / 3,
+      r: fixed ? 0 : (0.03 + 0.09 * Math.random()),
+      a: Math.random() * Math.PI * 2,
+      va: (Math.random() < 0.5 ? -1 : 1) * (0.00025 + Math.random() * 0.0004),
+      x: 0, y: 0,
+      heard: 0,     // ms when message received (0 = none)
+      relayAt: 0,   // scheduled relay time
+      relayed: false,
+      suppressed: false,
+    });
+  }
+  function place(n) {
+    n.x = n.cx * W + Math.cos(n.a) * n.r * W;
+    n.y = n.cy * H + Math.sin(n.a) * n.r * W;
+  }
+
+  // ---- message lifecycle ----
+  let origin = null, originPt = null, tEvent = 0;
+  const rings = [];   // {x, y, t0, relay}
+  const TTL = 9000;   // visible fade
+  const capLines = [
+    [0,    'A driver taps once. <b>A hazard is in the air</b> — no tower, no signal bars, no account.'],
+    [1100, 'Every car in radio range hears it directly.'],
+    [2600, 'The <b>farthest listener repeats first</b> — news races outward, not in circles.'],
+    [4400, 'Cars that already heard it <b>stay quiet</b>. No echo, no flooding.'],
+    [6500, 'The report stops at the edge of where it matters. Your area — not a global feed.'],
+    [8200, 'And then it <b>fades away everywhere</b>. Nothing stored. Nothing tracked. Nobody watched.'],
+  ];
+
+  function newEvent(now) {
+    nodes.forEach(n => { n.heard = 0; n.relayAt = 0; n.relayed = false; n.suppressed = false; });
+    rings.length = 0;
+    origin = nodes[Math.floor(Math.random() * (N - 2))]; // a car, not a beacon
+    place(origin);
+    originPt = { x: origin.x, y: origin.y };
+    origin.heard = now; origin.relayed = true;
+    rings.push({ x: origin.x, y: origin.y, t0: now });
+    tEvent = now;
+  }
+
+  function step(now) {
+    // move cars
+    for (const n of nodes) { if (!n.fixed) n.a += n.va * 16; place(n); }
+
+    if (!origin || now - tEvent > TTL + 2500) newEvent(now);
+
+    // ring propagation: when a ring front passes a node, it receives
+    for (const ring of rings) {
+      const age = now - ring.t0;
+      const rr = age * 0.14; // ring speed px/ms
+      if (rr > RANGE()) continue;
+      for (const n of nodes) {
+        if (n.heard) continue;
+        const d = Math.hypot(n.x - ring.x, n.y - ring.y);
+        if (d <= rr && d <= RANGE()) {
+          n.heard = now;
+          const fromOrigin = Math.hypot(n.x - originPt.x, n.y - originPt.y);
+          if (fromOrigin > RADIUS()) { n.suppressed = true; continue; }
+          // contention: farther from the SENDER relays sooner
+          const prox = 1 - Math.min(d / RANGE(), 1);      // 0 far .. 1 near
+          n.relayAt = now + 350 + prox * 1900;            // far = fast
+        }
+      }
+    }
+    // fire scheduled relays; suppress if 2+ neighbors already relayed nearby
+    for (const n of nodes) {
+      if (!n.relayAt || n.relayed || now < n.relayAt) continue;
+      n.relayAt = 0;
+      let covered = 0;
+      for (const r2 of rings)
+        if (Math.hypot(n.x - r2.x, n.y - r2.y) < RANGE() * 0.8) covered++;
+      if (covered >= 3) { n.suppressed = true; continue; } // heard it plenty
+      n.relayed = true;
+      rings.push({ x: n.x, y: n.y, t0: now });
+    }
+
+    // caption
+    const age = now - tEvent;
+    let line = capLines[0][1];
+    for (const [t, txt] of capLines) if (age >= t) line = txt;
+    if (cap.dataset.cur !== line) { cap.dataset.cur = line; cap.innerHTML = line; }
+  }
+
+  function draw(now) {
+    ctx.clearRect(0, 0, W, H);
+    const age = now - tEvent;
+    const fade = Math.max(0, Math.min(1, (TTL - age) / 2500)); // msg fade
+
+    // relevance radius (dashed) once the flood is under way
+    if (age > 5200 && fade > 0) {
+      ctx.setLineDash([6, 8]);
+      ctx.strokeStyle = `rgba(245,159,0,${0.35 * fade * Math.min(1, (age - 5200) / 800)})`;
+      ctx.beginPath(); ctx.arc(originPt.x, originPt.y, RADIUS(), 0, 7); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // rings
+    for (const ring of rings) {
+      const ra = now - ring.t0, rr = ra * 0.14;
+      if (rr > RANGE()) continue;
+      const a = (1 - rr / RANGE()) * 0.55;
+      ctx.strokeStyle = `rgba(255,107,107,${a})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(ring.x, ring.y, rr, 0, 7); ctx.stroke();
+    }
+
+    // nodes
+    for (const n of nodes) {
+      const has = n.heard && fade > 0;
+      if (has) { // halo
+        ctx.fillStyle = n.suppressed
+          ? `rgba(134,142,150,${0.18 * fade})`
+          : `rgba(255,107,107,${0.22 * fade})`;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 13, 0, 7); ctx.fill();
+      }
+      if (n.fixed) {
+        ctx.fillStyle = '#0CA678';
+        ctx.fillRect(n.x - 5, n.y - 5, 10, 10);
+      } else {
+        ctx.fillStyle = n === origin && fade > 0 ? '#FF6B6B' : '#5C7CFA';
+        ctx.beginPath(); ctx.arc(n.x, n.y, 6, 0, 7); ctx.fill();
+      }
+    }
+  }
+
+  function loop(now) {
+    step(now); draw(now);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

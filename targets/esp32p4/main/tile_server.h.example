@@ -1,0 +1,4 @@
+/* copy to tile_server.h (gitignored) to route device map downloads
+ * through the local caching proxy (server/tileserver.py) */
+#pragma once
+#define TILE_SERVER_BASE "http://192.168.68.53:8484"

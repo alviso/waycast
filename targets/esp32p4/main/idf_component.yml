@@ -1,0 +1,26 @@
+dependencies:
+  idf: ">=5.3"
+  # BSP for the Waveshare ESP32-P4-Module-DEV-KIT: DSI display + GT9271
+  # touch + esp_lvgl_port (pulls LVGL 9). Panel model is chosen in
+  # menuconfig (Board Support Package -> Display).
+  cfscn/esp32_p4_module_dev_kit: "^1.1.8"
+  # The BSP's CMake requires this touch driver but forgets to declare it
+  # as a managed dependency — declare it here so resolution succeeds.
+  # (Same author as the BSP publishes it.)
+  cfscn/esp_lcd_touch_ft6x36: "*"
+  # USB-host transports for the solderless prototype: u-blox GPS mouse
+  # (CDC-ACM) + Waveshare USB-TO-LoRa dongle (CH34x VCP).
+  usb_host_cdc_acm: "^2"
+  usb_host_vcp: "^1"
+  usb_host_ch34x_vcp: "^2"
+  usb_host_cp210x_vcp: "^2"
+  usb_host_ftdi_vcp: "^2"
+  # raw-SPI LoRa driver for the Adafruit RFM95W bonnet (SX1276-class);
+  # same API drives the product-path SX1262 later.
+  jgromes/radiolib: "^7"
+  # S6 Wi-Fi (tile downloads / updates): onboard C6 over SDIO —
+  # same esp_hosted stack proven by p4-netdisplay on this kit.
+  # pinned to match the C6's factory hosted-slave firmware (2.x);
+  # unpinned resolution pulls esp_hosted 3.0 -> major version mismatch
+  espressif/esp_wifi_remote: "~1.6"
+  espressif/esp_hosted: "~2.12"

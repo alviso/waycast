@@ -1,0 +1,33 @@
+--- loragw_hal.c.orig	2026-07-20 20:04:20.694329866 -0700
++++ loragw_hal.c	2026-07-20 20:05:03.511806174 -0700
+@@ -1113,8 +1113,9 @@
+             }
+         }
+         if (i == sizeof I2C_PORT_TEMP_SENSOR) {
+-            printf("ERROR: no temperature sensor found.\n");
+-            return LGW_HAL_ERROR;
++            printf("WARNING: no temperature sensor (RAK2287 has none); using default 25C.\n");
++            ts_fd = -1;
++            ts_addr = 0xFF;
+         }
+ 
+         /* Configure ADC AD338R for full duplex (CN490 reference design) */
+@@ -1221,7 +1222,7 @@
+         err = LGW_HAL_ERROR;
+     }
+ 
+-    if (CONTEXT_COM_TYPE == LGW_COM_SPI) {
++    if (CONTEXT_COM_TYPE == LGW_COM_SPI && ts_fd >= 0) {
+         DEBUG_MSG("INFO: Closing I2C for temperature sensor\n");
+         x = i2c_linuxdev_close(ts_fd);
+         if (x != 0) {
+@@ -1597,7 +1598,8 @@
+ 
+     switch (CONTEXT_COM_TYPE) {
+         case LGW_COM_SPI:
+-            err = stts751_get_temperature(ts_fd, ts_addr, temperature);
++            if (ts_fd < 0) { *temperature = 25.0; err = LGW_I2C_SUCCESS; }
++            else err = stts751_get_temperature(ts_fd, ts_addr, temperature);
+             break;
+         case LGW_COM_USB:
+             err = lgw_com_get_temperature(temperature);

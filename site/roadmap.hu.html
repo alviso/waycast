@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="hu">
+<meta charset="utf-8">
+<title>Útiterv — Waycast</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A Waycast négy pillére, őszintén szétválasztva: mi működik ma, mi van megtervezve, és mit kutatunk még.">
+<link rel="canonical" href="https://waycast.io/roadmap.hu.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/roadmap.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/roadmap.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Útiterv — Waycast">
+<meta property="og:description" content="A Waycast négy pillére, őszintén szétválasztva: mi működik ma, mi van megtervezve, és mit kutatunk még.">
+<meta property="og:url" content="https://waycast.io/roadmap.hu.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap;
+          max-width:1000px;margin:0 auto}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text)}
+  .links a.here{color:var(--signal)}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h1{font:700 clamp(28px,4.5vw,42px)/1.15 var(--sans);margin:10px 0 14px}
+  header.page{padding:64px 0 8px}
+  p{max-width:66ch}
+  .muted{color:var(--muted)}
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  section h2{font:700 24px/1.25 var(--sans);margin:0 0 6px}
+  .pillar-sub{color:var(--muted);margin:0 0 20px;max-width:66ch}
+  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+         gap:16px}
+  .tier{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:18px 20px}
+  .tier h3{margin:0 0 10px;font:700 12px/1 var(--mono);letter-spacing:.14em;
+           text-transform:uppercase}
+  .tier.run h3{color:var(--local)}
+  .tier.des h3{color:var(--signal)}
+  .tier.exp h3{color:var(--info)}
+  .tier ul{margin:0;padding-left:18px;color:var(--muted);font-size:14.5px}
+  .tier li{margin:6px 0}
+  .tier b{color:var(--text);font-weight:600}
+  .gate{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:22px 24px;margin-top:8px}
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);
+         font:13px/1.8 var(--mono);color:var(--dim)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/index.hu.html">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.hu.html">Hogyan m&#369;k&ouml;dik</a>
+    <a href="/hardware.hu.html">Hardver</a>
+    <a href="/journal.hu.html">Napl&oacute;</a>
+    <a class="here" href="/roadmap.hu.html">&Uacute;titerv</a>
+    <a href="/contact.hu.html">Kapcsolat</a>
+    <a href="/roadmap.html" lang="en" hreflang="en">EN</a>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Útiterv</div>
+  <h1>Négy pillér, őszintén címkézve</h1>
+  <p class="muted">Ezen az oldalon minden három szintbe sorolva:
+     <b>működik</b> = ma, hardveren megy, és a
+     <a href="/journal.hu.html">naplóban</a> ott a dátuma;
+     <b>megtervezve</b> = a mechanizmus specifikált és részben kész;
+     <b>kutatjuk</b> = tudjuk, hogy a probléma fontos, és még a
+     formáját keressük. Itt semmi sem negyedévhez kötött ígéret.</p>
+</div></header>
+
+<section><div class="wrap">
+  <h2>1 &middot; Forgalmi riasztások</h2>
+  <p class="pillar-sub">Az alapító pillér: a veszélyjelzések autóról
+     autóra terjednek infrastruktúra nélkül, maguktól lejárnak, és
+     maguk a vezetők felügyelik őket.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Működik</h3><ul>
+      <li><b>Kétérintéses jelentés</b> az autós eszközön, offline
+          térkép, veszély-réteg, sebességtudatos &bdquo;következik&rdquo;</li>
+      <li><b>Geo-mulandó elárasztás</b> &mdash; csomópontonként egy
+          késleltetett ismétlés, relevancia-sugár, TTL-lejárat</li>
+      <li><b>Megerősítő/vitató szavazatok</b>, amelyek nyújtják
+          vagy vágják egy jelentés életét</li>
+      <li><b>Eszköz &harr; városi csomópont csere</b> 915&nbsp;MHz-en</li>
+    </ul></div>
+    <div class="tier des"><h3>Megtervezve</h3><ul>
+      <li>Sűrűségadaptív ismétlési ablakok a csúcsforgalmi éteridőre</li>
+      <li>Vidd-és-hirdesd-újra a ritkás szakaszokon át</li>
+    </ul></div>
+    <div class="tier exp"><h3>Kutatjuk</h3><ul>
+      <li>Szenzorral segített jelentés (hirtelenfékezés-jelzések,
+          sosem automatikus vádak)</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>2 &middot; Helyi információ</h2>
+  <p class="pillar-sub">A mesh mint a város faliújságja: ami pár
+     kilométeren belül számít, pár órán át.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Működik</h3><ul>
+      <li><b>HELYI csatorna</b> az eszközön &mdash; események,
+          üzemanyag, szállás, segítség; parkolva böngészhető</li>
+      <li><b>Hivatalos időjárási riasztások</b> &mdash; a városi
+          csomópontok élő National Weather Service riasztásokat
+          sugároznak valós lejárattal</li>
+    </ul></div>
+    <div class="tier des"><h3>Megtervezve</h3><ul>
+      <li>Út-esemény hírfolyamok állami közútkezelői nyílt adatokból</li>
+      <li>Hely-jeladók kérdés/válasz keretekkel (a rádióformátum
+          már fenntartja őket)</li>
+    </ul></div>
+    <div class="tier exp"><h3>Kutatjuk</h3><ul>
+      <li>Mit változtat egy &bdquo;katasztrófa-üzemmód&rdquo;:
+          hosszabb lejáratok, tágabb körzetek, segítség-először
+          rangsor</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>3 &middot; Csoportok</h2>
+  <p class="pillar-sub">Egy konvoj, egy klub, egy családi karaván
+     &mdash; egymással beszélgetve ugyanazokon a rádiókon,
+     privátban.</p>
+  <div class="tiers">
+    <div class="tier des"><h3>Megtervezve</h3><ul>
+      <li>A csatorna-bájt ma is minden keret első osztályú
+          polgára; a csoportcsatornák érintetlenül utaznak a meglévő
+          továbbításon</li>
+    </ul></div>
+    <div class="tier exp"><h3>Kutatjuk</h3><ul>
+      <li>Kulcscsere, amely túléli a se-szerver-se-fiók megkötést
+          (előre megosztott? QR az induláskor?)</li>
+      <li>Mit nem tehet <em>soha</em> a csoportforgalom a közös
+          éteridő-kerettel</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>4 &middot; Vállalkozások</h2>
+  <p class="pillar-sub">Egy bolt, amely bemutatkozik az útnak, és
+     egyszerű kérdésekre válaszol &mdash; közbeékelt platform
+     nélkül.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Működik</h3><ul>
+      <li><b>Szerkesztő-prototípus</b> &mdash; helyi oldal, ahová a
+          tulajdonos hirdetést ír, és egy adapter sugározza</li>
+    </ul></div>
+    <div class="tier des"><h3>Megtervezve</h3><ul>
+      <li>Kérdés/válasz üzenettípusok (már a rádióformátumban)
+          &mdash; a &bdquo;ma nyitva?&rdquo; kérdésre maga a hely
+          válaszol</li>
+      <li>Bolti jeladó készülékként, a városi csomópont testvére</li>
+    </ul></div>
+    <div class="tier exp"><h3>Kutatjuk</h3><ul>
+      <li>Küldő-fizet ösztönzők kereskedelmi hirdetésekhez &mdash;
+          anélkül, hogy a mesh óriásplakáttá válna</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="gate">
+    <div class="eyebrow">A kiadási kapu</div>
+    <p style="margin:10px 0 0">A firmware és a protokoll akkor
+       válik nyilvánossá nyílt licenc alatt, amikor a mesh-demót egy
+       idegen is megismételheti: felflasheli, vezet, látja a jelentést
+       ugrani. Inkább nyitunk későn, mint üresen. A haladást a
+       <a href="/journal.hu.html">napló</a> rögzíti, ahogy
+       történik.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  WAYCAST &middot; <a href="/index.hu.html">waycast.io</a> &middot; nyíltan építve
+</div></footer>
+</html>

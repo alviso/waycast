@@ -1,0 +1,42 @@
+<svg viewBox="0 0 1920 384" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waycast subreddit banner — beacons relaying along a road line,
+       wordmark right. Site palette. Bottom-left stays quiet: the round
+       community icon overlaps that corner in Reddit's layout. -->
+  <rect width="1920" height="384" fill="#101318"/>
+  <!-- ground below the road line, a shade deeper -->
+  <rect y="300" width="1920" height="84" fill="#0C0F13"/>
+  <!-- the road, edge-on: solid edge + center dashes -->
+  <line x1="0" y1="300" x2="1920" y2="300" stroke="#262C36" stroke-width="4"/>
+  <line x1="0" y1="299" x2="1920" y2="299" stroke="#E7ECF2" stroke-width="3"
+        stroke-dasharray="26 34" opacity="0.35"/>
+
+  <!-- beacon 1: the origin, largest -->
+  <g>
+    <circle cx="430" cy="282" r="18" fill="#F59F00"/>
+    <path fill="none" d="M 395.4 262 A 40 40 0 0 1 464.6 262" stroke="#F59F00" stroke-width="12" stroke-linecap="round"/>
+    <path fill="none" d="M 373.9 249.5 A 65 65 0 0 1 486.1 249.5" stroke="#F59F00" stroke-width="10" stroke-linecap="round" opacity="0.70"/>
+    <path fill="none" d="M 352.1 237 A 90 90 0 0 1 507.9 237" stroke="#F59F00" stroke-width="9" stroke-linecap="round" opacity="0.42"/>
+  </g>
+
+  <!-- beacon 2: the next town, mid -->
+  <g>
+    <circle cx="820" cy="286" r="13" fill="#F59F00"/>
+    <path fill="none" d="M 795.7 272 A 28 28 0 0 1 844.3 272" stroke="#F59F00" stroke-width="9" stroke-linecap="round"/>
+    <path fill="none" d="M 779.3 262.5 A 47 47 0 0 1 860.7 262.5" stroke="#F59F00" stroke-width="8" stroke-linecap="round" opacity="0.55"/>
+  </g>
+
+  <!-- beacon 3: farther still, faint -->
+  <g opacity="0.75">
+    <circle cx="1108" cy="289" r="9" fill="#F59F00"/>
+    <path fill="none" d="M 1090.7 279 A 20 20 0 0 1 1125.3 279" stroke="#F59F00" stroke-width="7" stroke-linecap="round"/>
+    <path fill="none" d="M 1078.6 272 A 34 34 0 0 1 1137.4 272" stroke="#F59F00" stroke-width="6" stroke-linecap="round" opacity="0.55"/>
+  </g>
+
+  <!-- wordmark, right -->
+  <text x="1330" y="212" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-weight="800" font-size="92" letter-spacing="6">
+    <tspan fill="#E7ECF2">WAY</tspan><tspan fill="#F59F00">CAST</tspan>
+  </text>
+  <text x="1334" y="256" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-weight="500" font-size="27" letter-spacing="2" fill="#8B95A3">postcards, not chat</text>
+</svg>

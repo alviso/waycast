@@ -1,0 +1,24 @@
+[Unit]
+Description=Waycast town-node mesh peer (RAK2287/SX1302 relay)
+Documentation=file:///home/waycast/waycast/peer/README.md
+After=local-fs.target
+# never give up: an unpowered/mid-reset SX1302 heals on the next try
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=waycast
+Group=waycast
+SupplementaryGroups=spi gpio
+EnvironmentFile=/etc/waycast/node.conf
+WorkingDirectory=/home/waycast/waycast/peer
+# start wrapper: GPS location when locked, node.conf otherwise;
+# publishes the result to /run/waycast/location for the injector
+ExecStart=/home/waycast/waycast/peer/peer-start.sh
+RuntimeDirectory=waycast
+RuntimeDirectoryPreserve=yes
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

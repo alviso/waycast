@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Roadmap — Waycast</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The four pillars of the Waycast product, honestly split into what runs today, what is designed, and what we're still exploring.">
+<link rel="canonical" href="https://waycast.io/roadmap.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/roadmap.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/roadmap.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Roadmap — Waycast">
+<meta property="og:description" content="The four pillars of the Waycast product, honestly split into what runs today, what is designed, and what we're still exploring.">
+<meta property="og:url" content="https://waycast.io/roadmap.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap;
+          max-width:1000px;margin:0 auto}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text)}
+  .links a.here{color:var(--signal)}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h1{font:700 clamp(28px,4.5vw,42px)/1.15 var(--sans);margin:10px 0 14px}
+  header.page{padding:64px 0 8px}
+  p{max-width:66ch}
+  .muted{color:var(--muted)}
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  section h2{font:700 24px/1.25 var(--sans);margin:0 0 6px}
+  .pillar-sub{color:var(--muted);margin:0 0 20px;max-width:66ch}
+  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+         gap:16px}
+  .tier{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:18px 20px}
+  .tier h3{margin:0 0 10px;font:700 12px/1 var(--mono);letter-spacing:.14em;
+           text-transform:uppercase}
+  .tier.run h3{color:var(--local)}
+  .tier.des h3{color:var(--signal)}
+  .tier.exp h3{color:var(--info)}
+  .tier ul{margin:0;padding-left:18px;color:var(--muted);font-size:14.5px}
+  .tier li{margin:6px 0}
+  .tier b{color:var(--text);font-weight:600}
+  .gate{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:22px 24px;margin-top:8px}
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);
+         font:13px/1.8 var(--mono);color:var(--dim)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.html">How it works</a>
+    <a href="/hardware.html">Hardware</a>
+    <a href="/journal.html">Journal</a>
+    <a class="here" href="/roadmap.html">Roadmap</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/roadmap.hu.html" lang="hu" hreflang="hu">HU</a>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Roadmap</div>
+  <h1>Four pillars, honestly labelled</h1>
+  <p class="muted">Everything on this page is sorted into three tiers:
+     <b>running</b> means it works on hardware today and the
+     <a href="/journal.html">journal</a> has the date; <b>designed</b>
+     means the mechanism is specified and partly built; <b>exploring</b>
+     means we know the problem matters and are still choosing the
+     shape. Nothing here is a promise with a quarter attached.</p>
+</div></header>
+
+<section><div class="wrap">
+  <h2>1 &middot; Traffic alerts</h2>
+  <p class="pillar-sub">The founding pillar: hazards travel car-to-car
+     with no infrastructure, expire on their own, and are policed by
+     the drivers themselves.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Running</h3><ul>
+      <li><b>Two-tap reporting</b> on the car device, offline map,
+          hazard overlay, speed-aware &ldquo;next ahead&rdquo;</li>
+      <li><b>Geo-ephemeral flooding</b> &mdash; one jittered
+          rebroadcast per node, relevance radius, TTL expiry</li>
+      <li><b>Confirm/deny votes</b> that stretch or cut a
+          report&rsquo;s life</li>
+      <li><b>Device &harr; town node exchange</b> over 915&nbsp;MHz</li>
+    </ul></div>
+    <div class="tier des"><h3>Designed</h3><ul>
+      <li>Density-adaptive relay windows for rush-hour airtime</li>
+      <li>Carry-and-re-announce across sparse gaps</li>
+    </ul></div>
+    <div class="tier exp"><h3>Exploring</h3><ul>
+      <li>Sensor-assisted reporting (hard-braking hints, never
+          automatic accusations)</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>2 &middot; Local information</h2>
+  <p class="pillar-sub">The mesh as a town&rsquo;s corkboard: what
+     matters within a few kilometres, for a few hours.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Running</h3><ul>
+      <li><b>LOCAL channel</b> on the device &mdash; events, fuel,
+          lodging, aid; browsable when parked</li>
+      <li><b>Official weather alerts</b> &mdash; town nodes broadcast
+          live National Weather Service advisories with true expiry</li>
+    </ul></div>
+    <div class="tier des"><h3>Designed</h3><ul>
+      <li>Road-incident feeds from state DOT open data</li>
+      <li>Place beacons with question/answer frames (the wire
+          format already reserves them)</li>
+    </ul></div>
+    <div class="tier exp"><h3>Exploring</h3><ul>
+      <li>What a &ldquo;disaster mode&rdquo; posture changes:
+          longer TTLs, wider radii, aid-first ranking</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>3 &middot; Groups</h2>
+  <p class="pillar-sub">A convoy, a club, a family caravan &mdash;
+     talking to each other through the same radios, privately.</p>
+  <div class="tiers">
+    <div class="tier des"><h3>Designed</h3><ul>
+      <li>Channel byte is first-class in every frame today;
+          group channels ride the existing relay untouched</li>
+    </ul></div>
+    <div class="tier exp"><h3>Exploring</h3><ul>
+      <li>Key exchange that survives the no-server, no-account
+          constraint (pre-shared? QR at the trailhead?)</li>
+      <li>What group traffic must <em>never</em> do to the shared
+          airtime budget</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>4 &middot; Businesses</h2>
+  <p class="pillar-sub">A shop announcing itself to the road, and
+     answering simple questions &mdash; without a platform in
+     between.</p>
+  <div class="tiers">
+    <div class="tier run"><h3>Running</h3><ul>
+      <li><b>Composer prototype</b> &mdash; a local page where an
+          owner writes an announcement and a dongle radiates it</li>
+    </ul></div>
+    <div class="tier des"><h3>Designed</h3><ul>
+      <li>Query/reply message types (in the wire format now) &mdash;
+          &ldquo;open today?&rdquo; answered by the place itself</li>
+      <li>Shop beacon as an appliance, sibling of the town node</li>
+    </ul></div>
+    <div class="tier exp"><h3>Exploring</h3><ul>
+      <li>Sender-pays incentives for commercial announcements,
+          without turning the mesh into a billboard</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="gate">
+    <div class="eyebrow">The release gate</div>
+    <p style="margin:10px 0 0">The firmware and protocol go public
+       under an open license when the mesh demo is repeatable by a
+       stranger: flash, drive, see a report hop. We&rsquo;d rather
+       open late than open hollow. Progress is logged in the
+       <a href="/journal.html">journal</a> as it happens.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  WAYCAST &middot; <a href="/">waycast.io</a> &middot; built in the open
+</div></footer>
+</html>

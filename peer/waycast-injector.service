@@ -1,0 +1,19 @@
+[Unit]
+Description=Waycast injector (NWS CAP alerts -> mesh)
+Documentation=file:///home/waycast/waycast/peer/injector.py
+Wants=network-online.target
+After=network-online.target waycast-peer.service
+
+[Service]
+Type=simple
+User=waycast
+Group=waycast
+EnvironmentFile=/etc/waycast/node.conf
+WorkingDirectory=/home/waycast/waycast/peer
+ExecStart=/usr/bin/python3 /home/waycast/waycast/peer/injector.py
+Restart=always
+# generous backoff: an api.weather.gov outage must not hammer anything
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://waycast.io/</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://waycast.io/index.hu.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://waycast.io/"/>
+  </url>
+  <url><loc>https://waycast.io/index.hu.html</loc></url>
+  <url>
+    <loc>https://waycast.io/howitworks.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://waycast.io/howitworks.html"/>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://waycast.io/howitworks.hu.html"/>
+  </url>
+  <url><loc>https://waycast.io/howitworks.hu.html</loc></url>
+  <url>
+    <loc>https://waycast.io/hardware.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://waycast.io/hardware.html"/>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://waycast.io/hardware.hu.html"/>
+  </url>
+  <url><loc>https://waycast.io/hardware.hu.html</loc></url>
+  <url>
+    <loc>https://waycast.io/journal.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://waycast.io/journal.html"/>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://waycast.io/journal.hu.html"/>
+  </url>
+  <url><loc>https://waycast.io/journal.hu.html</loc></url>
+  <url>
+    <loc>https://waycast.io/roadmap.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://waycast.io/roadmap.html"/>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://waycast.io/roadmap.hu.html"/>
+  </url>
+  <url><loc>https://waycast.io/roadmap.hu.html</loc></url>
+  <url><loc>https://waycast.io/contact.html</loc></url>
+  <url><loc>https://waycast.io/contact.hu.html</loc></url>
+</urlset>

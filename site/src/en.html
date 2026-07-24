@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Waycast — an open, off-grid vehicular mesh</title>
+<link rel="alternate" hreflang="en" href="https://waycast.io/">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/index.hu.html">
+<link rel="alternate" hreflang="x-default" href="https://waycast.io/">
+<link rel="canonical" href="https://waycast.io/">
+<meta name="description" content="Waycast is an open, off-grid vehicular mesh: hazard alerts, a town corkboard, and a disaster radio in one box on your dash. Cars pass small, perishable messages over LoRa — no account, no SIM, no server.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Waycast — an open, off-grid vehicular mesh">
+<meta property="og:description" content="Waycast is an open, off-grid vehicular mesh: hazard alerts, a town corkboard, and a disaster radio in one box on your dash. Cars pass small, perishable messages over LoRa — no account, no SIM, no server.">
+<meta property="og:url" content="https://waycast.io/">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Waycast",
+ "url":"https://waycast.io/",
+ "description":"An open, off-grid vehicular mesh network over LoRa."}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h2{font:700 clamp(24px,3.4vw,32px)/1.2 var(--sans);margin:10px 0 14px;
+     letter-spacing:-.01em;text-wrap:balance}
+  p{max-width:62ch}
+  .muted{color:var(--muted)}
+  section{padding:72px 0;border-top:1px solid var(--line)}
+
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap;
+          max-width:1000px;margin:0 auto}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text);text-decoration:none}
+
+  /* ---- hero ---- */
+  header.wrap{padding:64px 24px 0}
+  .mark{font:800 clamp(44px,8vw,84px)/1 var(--sans);
+        letter-spacing:.06em;margin:14px 0 6px}
+  .mark .cast{color:var(--signal)}
+  .thesis{font-size:clamp(17px,2.2vw,21px);color:var(--text);
+          max-width:34ch;text-wrap:balance;margin:12px 0 6px;
+          font-weight:550}
+  .sub{color:var(--muted);max-width:52ch}
+  .ctas{display:flex;gap:14px;margin:26px 0 8px;flex-wrap:wrap}
+  .btn{display:inline-block;padding:11px 20px;border-radius:8px;
+       font:600 14px/1 var(--sans)}
+  .btn.primary{background:var(--signal);color:#181000}
+  .btn.primary:hover{text-decoration:none;filter:brightness(1.08)}
+  .btn.ghost{border:1px solid var(--line);color:var(--text)}
+  .btn.ghost:hover{text-decoration:none;border-color:var(--dim)}
+  #air{display:block;width:100%;height:300px;margin-top:38px;
+       border:1px solid var(--line);border-radius:14px;background:#0C0F13}
+  .aircap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  .airline{font:500 15px/1.5 var(--sans);color:var(--text);min-height:24px;margin-top:14px}
+  .airticker{background:#0C0F13;border:1px solid var(--line);border-radius:10px;
+    margin-top:12px;padding:10px 14px;font:12px/1.75 var(--mono);
+    height:125px;overflow:hidden;display:flex;flex-direction:column;
+    justify-content:flex-end}
+  .airticker div{flex:0 0 auto;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis}
+  .airticker .tx{color:#FF6B6B}  .airticker .rly{color:var(--muted)}
+  .airticker .sup{color:var(--dim)} .airticker .att{color:var(--local)}
+  .airticker .loc{color:var(--local)} .airticker .exp{color:var(--dim);font-style:italic}
+
+  #demo video{display:block;width:100%;border:1px solid var(--line);
+       border-radius:14px;background:#0C0F13;margin-top:26px}
+  .vt{font-family:var(--mono);color:var(--signal);font-size:.92em}
+  .lang{position:absolute;top:26px;right:24px;font:600 12px/1 var(--mono);
+        letter-spacing:.1em}
+  header{position:relative}
+
+  /* ---- channels ---- */
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+        gap:16px;margin-top:26px}
+  .card{background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:22px}
+  .chip{display:inline-block;font:700 12px/1 var(--mono);
+        letter-spacing:.08em;padding:7px 11px;border-radius:999px;
+        margin-bottom:14px}
+  .chip.a{background:rgba(245,159,0,.14);color:var(--signal)}
+  .chip.t{background:rgba(12,166,120,.14);color:var(--local)}
+  .chip.r{background:rgba(224,49,49,.14);color:#FF6B6B}
+  .card h3{margin:0 0 8px;font-size:18px}
+  .card p{margin:0;color:var(--muted);font-size:15px}
+
+  /* ---- console ---- */
+  .console{background:#0C0F13;border:1px solid var(--line);
+           border-radius:12px;padding:22px 24px;margin-top:26px;
+           font:13.5px/1.9 var(--mono);overflow-x:auto}
+  .console .t{color:var(--dim)}
+  .console .rx{color:var(--info)}
+  .console .amber{color:var(--signal)}
+  .console .ok{color:var(--local)}
+  .console .fade{color:var(--dim);font-style:italic}
+  .how{display:grid;grid-template-columns:1fr 1fr;gap:32px;
+       align-items:start}
+  @media(max-width:760px){.how{grid-template-columns:1fr}}
+
+  /* ---- radios table ---- */
+  table{border-collapse:collapse;width:100%;margin-top:26px;
+        font-variant-numeric:tabular-nums}
+  td{padding:13px 16px;border-top:1px solid var(--line);font-size:15px}
+  tr:first-child td{border-top:none}
+  td.radio{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+  td.state{text-align:right;font:600 13px var(--mono);white-space:nowrap}
+  .on{color:var(--local)} .off{color:var(--dim)} .none{color:var(--signal)}
+  .tablebox{background:var(--panel);border:1px solid var(--line);
+            border-radius:12px;overflow:hidden}
+  @media(max-width:680px){
+    table{display:block}
+    tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;
+       padding:12px 16px;border-top:1px solid var(--line)}
+    tr:first-child{border-top:none}
+    td{display:block;padding:0;border-top:none}
+    td.radio{order:1;flex:1;white-space:normal}
+    td.state{order:2;text-align:right}
+    td:nth-child(2){order:3;flex-basis:100%;color:var(--muted);
+       font-size:14px}
+  }
+  .quote{margin:22px 0 0;padding-left:16px;border-left:3px solid var(--signal);
+         color:var(--text);font-size:17px;max-width:52ch}
+
+  /* ---- status ---- */
+  .status{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+          gap:36px;align-items:center}
+  @media(max-width:760px){.status{grid-template-columns:1fr}}
+  .status img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+  .cap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  ul.done{list-style:none;margin:18px 0 0;padding:0}
+  ul.done li{padding:7px 0 7px 26px;position:relative;color:var(--muted);
+             font-size:15px}
+  ul.done li::before{content:"";position:absolute;left:2px;top:14px;
+        width:8px;height:8px;border-radius:99px;background:var(--local)}
+  ul.done li.next::before{background:var(--signal)}
+  ul.done li strong{color:var(--text);font-weight:600}
+
+  footer{padding:56px 0 72px;border-top:1px solid var(--line);
+         color:var(--dim);font:13px/1.8 var(--mono)}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;
+               flex-wrap:wrap}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+</style>
+
+<nav class="top"><div class="navrow">
+  <a class="brand" href="/">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.html">How it works</a>
+    <a href="/hardware.html">Hardware</a>
+    <a href="/journal.html">Journal</a>
+    <a href="/roadmap.html">Roadmap</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/index.hu.html" lang="hu" hreflang="hu">HU</a>
+  </div>
+</div></nav>
+
+<header class="wrap">
+  <div class="eyebrow">An open, off-grid vehicular mesh</div>
+  <div class="mark">WAY<span class="cast">CAST</span></div>
+  <p class="thesis">Hazard alerts like Waze. A town corkboard.
+     A disaster radio. One box on your dash.</p>
+  <p class="sub">No account. No SIM card. No server. Cars pass small,
+     perishable, local messages to each other over LoRa — and the
+     information dies on its own when it stops being true.</p>
+  <div class="ctas">
+    <a class="btn primary" href="/contact.html">Get in touch</a>
+    <a class="btn ghost" href="#status">See the prototype</a>
+  </div>
+  <canvas id="air" aria-label="Animation: a hazard message rippling between two vehicles over radio"></canvas>
+  <div class="airline" id="airline">a driver taps once — a hazard is in the air</div>
+  <div class="airticker" id="airticker" aria-hidden="true"></div>
+  <div class="aircap">915 MHz &middot; LoRa SF7/125k &middot; a hazard frame is 29 bytes &middot; one rebroadcast per node, then silence &middot; <b>tap the map to report one yourself</b></div>
+</header>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="eyebrow">The demo</div>
+    <h2>One drive, two excerpts</h2>
+    <p class="muted">The simulator drives the exact firmware that runs on
+       the device &mdash; same map, same mesh logic, same screen, on a real
+       Cupertino route. First excerpt: a debris report arrives off the mesh
+       at <span class="vt">0:11</span> and another car confirms it at
+       <span class="vt">0:36</span> (a second follows). Second: the turn onto Homestead Rd,
+       a fog report the mesh has voted down &mdash; and, once parked, the
+       local corkboard unfolding.</p>
+    <video controls muted playsinline preload="metadata"
+           poster="{{POSTER}}" src="{{VIDEO}}"
+           aria-label="Screen recording of the Waycast driving interface"></video>
+  </div>
+</section>
+
+<section id="channels">
+  <div class="wrap">
+    <div class="eyebrow">What travels the mesh</div>
+    <h2>Three kinds of messages, one radio</h2>
+    <div class="cols">
+      <div class="card">
+        <span class="chip a">SAFETY &middot; while driving</span>
+        <h3>Debris &mdash; 400 m</h3>
+        <p>Crashes, slowdowns, ice. Reported in two taps by the car
+           ahead, gone from every screen when it expires. Other
+           drivers confirm or dispute it &mdash; corroboration extends
+           its life, doubt fades it out.</p>
+      </div>
+      <div class="card">
+        <span class="chip t">LOCAL &middot; when parked</span>
+        <h3>2 rooms &mdash; Cupertino Inn</h3>
+        <p>The town corkboard: events, lodging, fuel, food. Speed-gated
+           so chatter never competes with a crash warning &mdash; pull
+           over, and the local layer unfolds.</p>
+      </div>
+      <div class="card">
+        <span class="chip r">RESILIENCE &middot; when it matters</span>
+        <h3>Water + first aid &mdash; De Anza</h3>
+        <p>When cell networks fail, this network doesn't notice.
+           A fixed beacon at an aid station, a shop, a campsite keeps
+           broadcasting to every passing car. That's the point.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2>No routes. No accounts. Geography does the networking.</h2>
+    <div class="how">
+      <div>
+        <p class="muted">Every message carries where it happened, how far
+           it matters, and when it stops being true. A car that hears one
+           rebroadcasts it once &mdash; if it's still fresh, and still
+           inside the relevance radius. Cars driving away simply fall out
+           of range of caring. The flood limits itself.</p>
+        <p class="muted">Nobody is addressed. Nothing is stored centrally.
+           There is no route to maintain at highway closing speeds,
+           because there are no routes at all &mdash; which is why a
+           two-second contact window between opposing traffic is enough.</p>
+        <p class="muted">Votes travel the same way: <em>confirmed</em>
+           stretches a report's lifetime, <em>not&nbsp;there</em> cuts it.
+           The mesh moderates itself the way a village does &mdash; a lie
+           dies within earshot of the liar.</p>
+      </div>
+      <div class="console" role="img" aria-label="Console log showing the life of one hazard message">
+<span class="t">14:02:11</span> <span class="amber">HAZARD</span> debris sev2 @37.3302,-122.0352 r=3km ttl=10m<br>
+<span class="t">14:02:11</span> <span class="rx">TX</span>&nbsp;&nbsp;29-byte frame &middot; one airtime slot<br>
+<span class="t">14:02:13</span> <span class="rx">RLY</span> node 8A41 rebroadcast &middot; hop 2<br>
+<span class="t">14:02:14</span> <span class="rx">RLY</span> node C7F0 rebroadcast &middot; hop 2 &middot; dup-dropped &times;3<br>
+<span class="t">14:04:40</span> <span class="ok">ATT</span> confirmed &times;2 &rarr; ttl +25%<br>
+<span class="t">14:09:02</span> <span class="t">RLY</span> node 22B9 outside radius &rarr; silent<br>
+<span class="t">14:14:52</span> <span class="fade">EXP</span> <span class="fade">expired &mdash; forgotten everywhere. no archive, no history.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="offgrid">
+  <div class="wrap">
+    <div class="eyebrow">Provably off-grid</div>
+    <h2>An app can promise. Hardware can prove.</h2>
+    <p class="muted">A phone app that says "local only" is a claim you
+       can't check. Waycast is a dedicated device with a known,
+       auditable radio set &mdash; and the firmware is open source, so
+       both halves of the promise are inspectable. Tap the radio badge
+       on the device and it shows you this, live:</p>
+    <div class="tablebox">
+      <table>
+        <tr><td class="radio">LoRa (915 MHz)</td>
+            <td>the mesh &mdash; the only way anything arrives</td>
+            <td class="state on">ACTIVE</td></tr>
+        <tr><td class="radio">Bluetooth LE</td>
+            <td>optional phone tether, nothing else</td>
+            <td class="state off">OFF</td></tr>
+        <tr><td class="radio">Wi-Fi</td>
+            <td>user-enabled for updates only</td>
+            <td class="state off">OFF</td></tr>
+        <tr><td class="radio">Cellular</td>
+            <td>no modem, no SIM slot, no carrier path</td>
+            <td class="state none">NONE &mdash; BY DESIGN</td></tr>
+      </table>
+    </div>
+    <p class="quote">Everything this device knows arrived peer-to-peer.
+       It physically cannot surveil you, and it cannot be shut off by
+       an outage.</p>
+  </div>
+</section>
+
+<section id="status">
+  <div class="wrap">
+    <div class="eyebrow">Status &middot; July 2026</div>
+    <h2>Not a pitch deck. A working navigator.</h2>
+    <div class="status">
+      <div>
+        <img src="{{PHOTO}}" alt="The Waycast UI: live street map with a debris warning ahead, and a local market answering a question over the mesh" width="1280" height="720">
+        <div class="cap">the UI today &mdash; hazard ahead at 40&nbsp;mph, and a
+        farmers market answering &ldquo;today?&rdquo; over the mesh
+        (simulator render of the exact code the device runs
+        &mdash; <a href="howitworks.html">watch how the mesh works</a>)</div>
+      </div>
+      <div>
+        <ul class="done">
+          <li><strong>Driving UI on hardware</strong> &mdash; offline map,
+              pan/zoom, hazard overlay, two-tap reporting</li>
+          <li><strong>LOCAL channel</strong> &mdash; speed-gated corkboard,
+              teal pins, browse-when-parked</li>
+          <li><strong>Trust layer v0</strong> &mdash; confirm/deny votes,
+              TTL refresh, doubt-fade</li>
+          <li><strong>Wire protocol</strong> &mdash; 29-byte versioned
+              frames, tested, radio-ready</li>
+          <li><strong>Radio proven</strong> &mdash; car device &harr;
+              town node, both directions over 915&nbsp;MHz (July&nbsp;20)</li>
+          <li><strong>Town node live</strong> &mdash; self-starting
+              appliance with GPS time/location, broadcasting real
+              National Weather Service alerts</li>
+          <li class="next"><strong>Open release</strong> &mdash; GPL
+              firmware + open protocol spec, when the mesh demo stands</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>WAYCAST &middot; waycast.io &middot; built in the open</div>
+    <div>firmware: GPLv3 (planned) &middot; protocol: open spec &middot; US915 first</div>
+  </div>
+</footer>
+
+<script>
+window.AIR_CAPS = [
+  [0,'a driver taps once — a hazard is in the air'],
+  [1100,'every car in range hears it — even oncoming, in a two-second pass'],
+  [2600,'the farthest listener repeats first — news races outward'],
+  [4400,'cars already covered stay silent — no echo, no storm'],
+  [7000,'it travels only where it matters — the radius rides in the frame'],
+  [11500,'a passing driver confirms it — the report earns more time'],
+  [17000,'a shop announces on the calm channel — the town corkboard'],
+  [24000,'unrefreshed, it expires — the road forgets, by design'],
+];
+</script>
+<script>
+{{AIRJS}}
+</script>
+

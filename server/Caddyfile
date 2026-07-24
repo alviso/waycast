@@ -1,0 +1,4 @@
+tiles.waycast.io {
+	reverse_proxy tiles:8484
+	encode gzip
+}

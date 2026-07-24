@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="hu">
+<meta charset="utf-8">
+<title>Hardver — Waycast referencia-összeállítások</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A három hardverszerep, amelyből egy Waycast mesh felépül — és a pontos összeállítások, amelyeket ma futtatjuk.">
+<link rel="canonical" href="https://waycast.io/hardware.hu.html">
+<link rel="alternate" hreflang="en" href="https://waycast.io/hardware.html">
+<link rel="alternate" hreflang="hu" href="https://waycast.io/hardware.hu.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Waycast">
+<meta property="og:title" content="Hardver — Waycast referencia-összeállítások">
+<meta property="og:description" content="A három hardverszerep, amelyből egy Waycast mesh felépül — és a pontos összeállítások, amelyeket ma futtatjuk.">
+<meta property="og:url" content="https://waycast.io/hardware.hu.html">
+<meta property="og:image" content="https://waycast.io/waycast-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzEwMTMxOCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjIuOCIgZmlsbD0iI0Y1OUYwMCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1OUYwMCIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjc1Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTEuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjU5RjAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMzUiLz48L3N2Zz4=">
+<style>
+  :root{
+    --ground:#101318; --panel:#171B22; --line:#262C36;
+    --text:#E7ECF2; --muted:#8B95A3; --dim:#5C6672;
+    --signal:#F59F00; --local:#0CA678; --danger:#E03131; --info:#5C7CFA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);
+       font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:var(--signal);text-decoration:none}
+  a:hover,a:focus-visible{text-decoration:underline;outline:none}
+  nav.top{border-bottom:1px solid var(--line)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;gap:16px;flex-wrap:wrap}
+  .brand{font:800 18px/1 var(--sans);letter-spacing:.06em;color:var(--text)}
+  .brand .cast{color:var(--signal)}
+  .links{display:flex;gap:18px;font:600 13px/1 var(--mono)}
+  .links a{color:var(--muted)} .links a:hover{color:var(--text)}
+  .links a.here{color:var(--signal)}
+  .eyebrow{font:600 12px/1 var(--mono);letter-spacing:.22em;
+           color:var(--signal);text-transform:uppercase}
+  h1{font:700 clamp(28px,4.5vw,42px)/1.15 var(--sans);margin:10px 0 14px;
+     letter-spacing:-.01em;text-wrap:balance}
+  h2{font:700 22px/1.25 var(--sans);margin:0 0 10px}
+  p{max-width:66ch}
+  .muted{color:var(--muted)}
+  header.page{padding:64px 0 8px}
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  .role{display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:start}
+  @media(max-width:700px){.role{grid-template-columns:1fr}}
+  .chip{display:inline-block;font:700 12px/1 var(--mono);
+        letter-spacing:.08em;padding:7px 11px;border-radius:999px}
+  .chip.a{background:rgba(245,159,0,.14);color:var(--signal)}
+  .chip.t{background:rgba(12,166,120,.14);color:var(--local)}
+  .chip.i{background:rgba(92,124,250,.14);color:var(--info)}
+  .status{font:600 12px/1 var(--mono);letter-spacing:.06em;
+          color:var(--local);margin-left:10px}
+  .status.proto{color:var(--info)}
+  .parts{background:var(--panel);border:1px solid var(--line);
+         border-radius:12px;padding:18px 22px;margin:16px 0 0;
+         font:14px/1.9 var(--mono);color:var(--muted);list-style:none}
+  .parts li::before{content:"— ";color:var(--dim)}
+  .parts b{color:var(--text);font-weight:600}
+  img.proto{width:100%;max-width:520px;border:1px solid var(--line);
+            border-radius:12px;margin-top:16px;display:block}
+  .cap{font:12px/1.6 var(--mono);color:var(--dim);margin-top:8px}
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);
+         font:13px/1.8 var(--mono);color:var(--dim)}
+  @media(max-width:680px){
+    .navrow{flex-direction:column;align-items:flex-start;gap:10px;
+      padding:14px 16px}
+    .links{flex-wrap:wrap;gap:8px 14px;row-gap:8px}
+    .brand{font-size:16px}
+  }
+  img.proto{cursor:zoom-in}
+  #lightbox{position:fixed;inset:0;background:rgba(8,10,13,.94);
+    display:flex;align-items:center;justify-content:center;z-index:99;
+    cursor:zoom-out}
+  #lightbox img{max-width:96vw;max-height:94vh;border-radius:10px}
+</style>
+
+<nav class="top"><div class="navrow wrap">
+  <a class="brand" href="/index.hu.html">WAY<span class="cast">CAST</span></a>
+  <div class="links">
+    <a href="/howitworks.hu.html">Hogyan m&#369;k&ouml;dik</a>
+    <a class="here" href="/hardware.hu.html">Hardver</a>
+    <a href="/journal.hu.html">Napl&oacute;</a>
+    <a href="/roadmap.hu.html">&Uacute;titerv</a>
+    <a href="/contact.hu.html">Kapcsolat</a>
+    <a href="/hardware.html" lang="en" hreflang="en">EN</a>
+  </div>
+</div></nav>
+
+<header class="page"><div class="wrap">
+  <div class="eyebrow">Hardver</div>
+  <h1>Három szerep, három referencia-összeállítás</h1>
+  <p class="muted">A Waycast mesh három szerepet játszó eszközökből
+     épül fel. Ezek nem koncepciórenderek &mdash; minden alábbi
+     összeállítás ma futó hardver, pontosan felsorolva. Az építési
+     útmutatók és a firmware-letöltések a nyílt kiadással érkeznek;
+     addig ez az oldal az őszinte leltár.</p>
+</div></header>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip a">VEZETÉS</span></div>
+  <div>
+    <h2>Az autós eszköz <span class="status">TEREPEN BIZONYÍTOTT</span></h2>
+    <p>Szélvédőre való navigátor, amelynek se hálózat, se fiók nem
+       kell: offline utcatérkép, veszély-réteg, kétérintéses jelentés,
+       megerősítő/vitató szavazatok, és parkoláskor kinyíló helyi
+       faliújság. Mindent, amit tud, rádión kapta a többi
+       résztvevőtől.</p>
+    <ul class="parts">
+      <li><b>ESP32-P4 fejlesztőkit</b> 7&Prime;-os 720&times;1280 érintőpanellel</li>
+      <li><b>LoRa rádió</b>: SX1262 HAT a 40 tűs csatlakozón, vagy
+          USB LoRa adapter &mdash; mindkét profil támogatott</li>
+      <li><b>GPS</b>: USB vevő (NMEA)</li>
+      <li><b>Térképtár</b>: microSD csempekészlet, vagy flashbe
+          ágyazott csempék az önálló demóegységhez</li>
+    </ul>
+    <img class="proto" src="{{DEVDRIVE}}" alt="A Waycast eszköz: 7 hüvelykes panel a vezetési nézettel — élő utcatérkép útvonalszalaggal, Lassulás figyelmeztetés 460 méterre, és a Jelentés gomb">
+    <div class="cap">a vezetési testtartás &mdash; offline térkép, a
+         következő veszély, egyetlen fix Jelentés gomb. Minden elem
+         rádión érkezett.</div>
+    <img class="proto" src="{{DEVSQUARE}}" alt="A Waycast eszköz a parkolási főtér nézettel: jegyzetek listája — lassulás, szállás, termelői piac, útakadály megerősítésekkel, és egy baleseti jelentés">
+    <div class="cap">megállva kinyílik a főtér &mdash; minden éppen élő
+         jegyzet a mesh-en, forrással, korral és lejárattal. Lejáratkor
+         eltűnnek, sehol sem tárolódnak.</div>
+  </div>
+</div></div></section>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip t">HORGONY</span></div>
+  <div>
+    <h2>A városi csomópont <span class="status">ÉJJEL-NAPPAL ÜZEMEL</span></h2>
+    <p>Fix csomópont koncentrátor-osztályú rádióval, amely minden
+       terjesztési tényezőt több csatornán egyszerre hall &mdash; a
+       mesh legjobb füle. Továbbítja a forgalmat, és közérdekű
+       információt juttat a hálózatba: ma ez az amerikai National
+       Weather Service élő riasztásait jelenti a körzetére, a
+       nyilvános API-ból lekérdezve, valós lejárati idejükkel
+       sugározva. GPS-ből tudja a saját helyzetét és tartja a pontos
+       időt, így internet nélkül is megbízható marad.</p>
+    <ul class="parts">
+      <li><b>Raspberry Pi 4</b>, Raspberry Pi OS Lite</li>
+      <li><b>SX1302 LoRa koncentrátor HAT</b> (SPI) &mdash; széles
+          körben elérhető LoRaWAN átjáró-hardver, új életre keltve</li>
+      <li><b>u-blox GPS</b> a HAT-en &mdash; pozíció + fegyelmezett óra</li>
+      <li><b>Telepítés</b>: egyetlen szkript visz egy friss SD-kártyát
+          önmagától induló készülékig &mdash; áramszünetet túlél,
+          billentyűzet sosem kell</li>
+    </ul>
+  </div>
+</div></div></section>
+
+<section><div class="wrap"><div class="role">
+  <div><span class="chip i">HIRDETÉS</span></div>
+  <div>
+    <h2>A bolti jeladó <span class="status proto">PROTOTÍPUS</span></h2>
+    <p>Kis állomás egy vállalkozásnak vagy közösségi pontnak: helyi
+       oldalt szolgál ki, ahová a tulajdonos beírja, amit az arra
+       járóknak tudniuk érdemes &mdash; nyitvatartás, napi ajánlat,
+       &bdquo;van üzemanyag&rdquo; &mdash;, és meghirdeti a mesh-en,
+       hogy a közeli vezetők lássák a faliújságon. Se platform, se
+       fiók, se díjak: a hirdetésed a saját tetődről sugárzik.</p>
+    <ul class="parts">
+      <li><b>Bármilyen Mac/PC</b> (Raspberry Pi változat tervben)</li>
+      <li><b>USB LoRa adapter</b> rádiónak</li>
+      <li><b>Szerkesztőoldal</b> helyben kiszolgálva &mdash; egyszer
+          megírod, a mesh viszi</li>
+    </ul>
+  </div>
+</div></div></section>
+
+<footer><div class="wrap">
+  WAYCAST &middot; <a href="/index.hu.html">waycast.io</a> &middot; nyíltan építve
+  &middot; a hardverútmutatók a nyílt kiadással érkeznek
+</div></footer>
+<script>
+document.querySelectorAll('img.proto').forEach(function (im) {
+  im.addEventListener('click', function () {
+    var lb = document.createElement('div'); lb.id = 'lightbox';
+    var big = document.createElement('img');
+    big.src = im.src; big.alt = im.alt;
+    lb.appendChild(big);
+    function close() { lb.remove(); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') close(); }
+    lb.addEventListener('click', close);
+    document.addEventListener('keydown', esc);
+    document.body.appendChild(lb);
+  });
+});
+</script>
+</html>
