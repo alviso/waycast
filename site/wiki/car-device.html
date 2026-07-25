@@ -85,11 +85,14 @@ bench pair — worth ordering a spare.</p>
 factory jumper bypasses the onboard USB hub. You need two ports (GPS +
 LoRa), so:</p>
 <ol>
-<li>Find the <strong>H3</strong> 3-pin jumper header near the USB-A stack (next to
-   the FSUSB42UMX chip).</li>
-<li>Move the cap to the <strong>other pair</strong> of pins (SEL=L → hub enabled).</li>
-<li>Result: <strong>three</strong> live USB-A ports through the hub. (The port that
-   worked before goes dead in this position — that's expected.)</li>
+<li>Find the <strong>H3</strong> 3-pin header with the <strong>yellow jumper cap</strong>, near
+   the USB-A stack (next to the FSUSB42UMX chip).</li>
+<li>Move the cap to the <strong>DEVICE side</strong> of the header — yes, DEVICE,
+   even though you're enabling more host ports; the label refers to
+   the port the mux abandons, not the mode you get. (Electrically:
+   SEL=L → hub enabled.)</li>
+<li>Result: <strong>three</strong> live USB-A ports through the hub. (The single
+   port that worked before goes dead in this position — expected.)</li>
 </ol>
 <p>No firmware change needed — the firmware already handles the hub.</p>
 <h2 id="3-configure-the-lora-dongle-once-on-any-computer">3. Configure the LoRa dongle (once, on any computer)</h2>

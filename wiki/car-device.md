@@ -23,11 +23,14 @@ Out of the box, only ONE of the kit's four USB-A ports works — the
 factory jumper bypasses the onboard USB hub. You need two ports (GPS +
 LoRa), so:
 
-1. Find the **H3** 3-pin jumper header near the USB-A stack (next to
-   the FSUSB42UMX chip).
-2. Move the cap to the **other pair** of pins (SEL=L → hub enabled).
-3. Result: **three** live USB-A ports through the hub. (The port that
-   worked before goes dead in this position — that's expected.)
+1. Find the **H3** 3-pin header with the **yellow jumper cap**, near
+   the USB-A stack (next to the FSUSB42UMX chip).
+2. Move the cap to the **DEVICE side** of the header — yes, DEVICE,
+   even though you're enabling more host ports; the label refers to
+   the port the mux abandons, not the mode you get. (Electrically:
+   SEL=L → hub enabled.)
+3. Result: **three** live USB-A ports through the hub. (The single
+   port that worked before goes dead in this position — expected.)
 
 No firmware change needed — the firmware already handles the hub.
 
