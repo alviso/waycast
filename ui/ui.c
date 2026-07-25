@@ -512,6 +512,12 @@ static void local_header_cb(lv_event_t *e)
     town_square_request_open();
 }
 
+static void gear_btn_cb(lv_event_t *e)
+{
+    (void)e;
+    settings_open();
+}
+
 static void square_btn_cb(lv_event_t *e)
 {
     (void)e;
@@ -910,6 +916,22 @@ void ui_init(void)
     lv_label_set_text(sql, LV_SYMBOL_HOME "  Town square");
     lv_obj_set_style_text_font(sql, &lv_font_montserrat_14, 0);
     lv_obj_center(sql);
+
+    /* gear: one tap straight to Wi-Fi & maps — the wiki had to explain
+     * "tap the unlabeled badges, then find the button" twice; when the
+     * manual apologizes for the UI, the UI is wrong */
+    lv_obj_t *gearb = lv_button_create(status_bar);
+    lv_obj_set_size(gearb, 48, 34);
+    lv_obj_align(gearb, LV_ALIGN_RIGHT_MID, -240, 0);
+    lv_obj_set_style_bg_color(gearb, lv_color_hex(0x22262E), 0);
+    lv_obj_set_style_border_width(gearb, 1, 0);
+    lv_obj_set_style_border_color(gearb, lv_color_hex(0x3B4252), 0);
+    lv_obj_set_style_radius(gearb, 17, 0);
+    lv_obj_add_event_cb(gearb, gear_btn_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *gl = lv_label_create(gearb);
+    lv_label_set_text(gl, LV_SYMBOL_SETTINGS);
+    lv_obj_set_style_text_color(gl, lv_color_hex(0xADB5BD), 0);
+    lv_obj_center(gl);
 
     /* left: the map */
     lv_obj_t *map_wrap = lv_obj_create(scr);
