@@ -35,7 +35,8 @@ still send (receivers timestamp them on arrival), you just navigate
 from your last known position until lock.
 
 **Map is a grid.** No tiles for where you are. Download a coverage
-tier (Settings → Wi-Fi & maps) or check the card is FAT32 with tiles
+tier (tap the status badges top-left → Wi-Fi & maps) or check the
+card is FAT32 with tiles
 in `/tiles/{z}/{x}/{y}.png`.
 
 **Update seemingly failed / device rebooted twice.** That's the

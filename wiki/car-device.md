@@ -78,9 +78,10 @@ idf.py flash
 
 First flash takes a few minutes (it writes the map-tile fallback
 partition too). **This is the only USB flash you'll ever need** — the
-partition table is A/B and every later update arrives over the air
-(Settings → Check update), with automatic rollback if an update
-misbehaves.
+partition table is A/B and every later update arrives over the air —
+tap the **status badges top-left** (there is no settings button) →
+**Wi-Fi & maps** → **Check update** — with automatic rollback if an
+update misbehaves.
 
 ## 6. First boot checklist
 
