@@ -88,9 +88,8 @@ LoRa), so:</p>
 <li>Find the <strong>H3</strong> 3-pin header with the <strong>yellow jumper cap</strong>, near
    the USB-A stack (next to the FSUSB42UMX chip).</li>
 <li>Move the cap to the <strong>DEVICE side</strong> of the header — yes, DEVICE,
-   even though you're enabling more host ports; the label refers to
-   the port the mux abandons, not the mode you get. (Electrically:
-   SEL=L → hub enabled.)</li>
+   counterintuitive as that reads when you're enabling more host
+   ports. (Electrically: SEL=L → hub upstream enabled.)</li>
 <li>Result: <strong>three</strong> live USB-A ports through the hub. (The single
    port that worked before goes dead in this position — expected.)</li>
 </ol>
