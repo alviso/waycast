@@ -27,6 +27,8 @@ static uint32_t s_own_origin = OWN_ORIGIN_ID;
 void scenario_set_own_origin(uint32_t id) { if (id) s_own_origin = id; }
 uint32_t scenario_own_origin(void) { return s_own_origin; }
 
+static uint16_t next_own_seq(void); /* defined with the seq persistence */
+
 /* Own handle (§7¾ pseudonym): a label riding HELLO frames. Persisted
  * by the device target (NVS); weak no-op in the sim. */
 static char s_own_handle[16];
@@ -59,7 +61,6 @@ void scenario_make_own_hello(vmesh_msg_t *m)
  * network's dedup silently eat a fresh report that reuses an already-
  * seen origin/seq pair). Device target persists via NVS; sim no-op. */
 void __attribute__((weak)) waycast_save_seq(uint16_t seq) { (void)seq; }
-static uint16_t next_own_seq(void);
 void scenario_set_own_seq(uint16_t seq);
 
 typedef struct {
