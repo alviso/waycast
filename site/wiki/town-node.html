@@ -71,25 +71,22 @@ appliance.</p>
 <td>any 915 MHz fiberglass/whip with the right connector</td>
 <td>$15–50</td>
 </tr>
-<tr>
-<td>Optional: <strong>VK-172 USB GPS</strong></td>
-<td>Amazon/AliExpress</td>
-<td>$10</td>
-</tr>
 </tbody>
 </table>
 <blockquote>
 <p>Why a concentrator instead of a $25 dongle? The SX1302 hears <strong>all
 spreading factors on 8 channels simultaneously</strong> — a town node
-should hear everyone, always. The GPS variant also gives the node
-its own time and position.</p>
+should hear everyone, always. The GPS variant has a GNSS module
+onboard, so the node knows its own time and position — no extra
+GPS hardware needed.</p>
 </blockquote>
 <h2 id="2-prepare-the-pi">2. Prepare the Pi</h2>
 <p>Standard Raspberry Pi OS (64-bit, Lite is fine). Enable SPI:</p>
 <pre><code class="language-sh">sudo raspi-config nonint do_spi 0
 </code></pre>
 <p>Seat the RAK2287 on its Pi HAT, the HAT on the Pi's 40-pin header,
-antenna on the RF port. <strong>Never power the concentrator without an
+LoRa antenna on the RF port, GPS antenna on the GNSS port (both come
+with the module). <strong>Never power the concentrator without the LoRa
 antenna attached.</strong></p>
 <h2 id="3-install-waycast">3. Install Waycast</h2>
 <pre><code class="language-sh">git clone https://github.com/alviso/waycast.git
@@ -112,8 +109,9 @@ sudo nano /etc/waycast/node.conf
 NODE_LON=-122.89
 NODE_NAME=YourTown      # what car screens will show: ⌂ YourTown
 </code></pre>
-<p>(With a USB GPS plugged in, position comes from the GPS instead and
-the config is the fallback.) Then:</p>
+<p>(With the GPS antenna attached and sky view, position and time come
+from the concentrator's own GNSS and the config is the fallback.)
+Then:</p>
 <pre><code class="language-sh">sudo systemctl restart waycast-peer waycast-injector
 </code></pre>
 <h2 id="5-how-you-know-its-working">5. How you know it's working</h2>

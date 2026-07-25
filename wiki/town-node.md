@@ -14,12 +14,12 @@ appliance.
 | **RAK2287 concentrator module** — SPI version, **US915**, with GPS | [RAK store](https://store.rakwireless.com/products/rak2287-lpwan-gateway-concentrator-module) | $80–100 |
 | **RAK2287 Pi HAT** (the adapter board) | same page, "Pi HAT" option | $15–20 |
 | **915 MHz antenna** — mount it high; this sets your town's radius | any 915 MHz fiberglass/whip with the right connector | $15–50 |
-| Optional: **VK-172 USB GPS** | Amazon/AliExpress | $10 |
 
 > Why a concentrator instead of a $25 dongle? The SX1302 hears **all
 > spreading factors on 8 channels simultaneously** — a town node
-> should hear everyone, always. The GPS variant also gives the node
-> its own time and position.
+> should hear everyone, always. The GPS variant has a GNSS module
+> onboard, so the node knows its own time and position — no extra
+> GPS hardware needed.
 
 ## 2. Prepare the Pi
 
@@ -30,7 +30,8 @@ sudo raspi-config nonint do_spi 0
 ```
 
 Seat the RAK2287 on its Pi HAT, the HAT on the Pi's 40-pin header,
-antenna on the RF port. **Never power the concentrator without an
+LoRa antenna on the RF port, GPS antenna on the GNSS port (both come
+with the module). **Never power the concentrator without the LoRa
 antenna attached.**
 
 ## 3. Install Waycast
@@ -63,8 +64,9 @@ NODE_LON=-122.89
 NODE_NAME=YourTown      # what car screens will show: ⌂ YourTown
 ```
 
-(With a USB GPS plugged in, position comes from the GPS instead and
-the config is the fallback.) Then:
+(With the GPS antenna attached and sky view, position and time come
+from the concentrator's own GNSS and the config is the fallback.)
+Then:
 
 ```sh
 sudo systemctl restart waycast-peer waycast-injector
