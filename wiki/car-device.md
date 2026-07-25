@@ -79,9 +79,8 @@ idf.py flash
 First flash takes a few minutes (it writes the map-tile fallback
 partition too). **This is the only USB flash you'll ever need** — the
 partition table is A/B and every later update arrives over the air —
-tap the **status badges top-left** (there is no settings button) →
-**Wi-Fi & maps** → **Check update** — with automatic rollback if an
-update misbehaves.
+tap the **gear (⚙) in the top bar** → **Check update** — with
+automatic rollback if an update misbehaves.
 
 ## 6. First boot checklist
 
@@ -95,8 +94,8 @@ on. You should see:
 
 ## 7. Load offline maps
 
-Easiest: on the device. Tap the status badges (top-left) → **Wi-Fi &
-maps** → join your Wi-Fi → tap a coverage tier:
+Easiest: on the device. Tap the **gear (⚙) in the top bar** → join
+your Wi-Fi → tap a coverage tier:
 
 | Tier | Coverage | Size | Time |
 |---|---|---|---|
