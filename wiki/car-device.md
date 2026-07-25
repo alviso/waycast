@@ -8,7 +8,7 @@ hazard reports over LoRa. No soldering; one jumper cap moves.
 | Part | Where | ~Price |
 |---|---|---|
 | **Waveshare ESP32-P4-Module-DEV-KIT** (7" 720×1280 touch) | [Waveshare product page](https://www.waveshare.com/esp32-p4-module-dev-kit.htm) | $60–75 |
-| **Waveshare USB-TO-LoRa-xF** dongle — **HF version** (915 MHz), SX1262, TCXO | [Waveshare wiki + buy links](https://www.waveshare.com/wiki/USB-TO-LoRa-xF) | $25 |
+| **Waveshare USB-TO-LoRa-xF** dongle — **HF version** (915 MHz), SX1262, TCXO | [Waveshare product page](https://www.waveshare.com/product/iot-communication/long-range-wireless/nb-iot-lora/usb-to-lora.htm) ([docs](https://www.waveshare.com/wiki/USB-TO-LoRa-xF)) | $25 |
 | **VK-172 USB GPS** (u-blox 7) | search "VK-172" on Amazon/AliExpress | $10–15 |
 | **microSD card**, 8 GB+ (any brand) | anywhere | $8 |
 | USB-C power supply (car: any 15 W+ USB-C adapter) | anywhere | — |
