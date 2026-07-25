@@ -109,6 +109,7 @@ static void print_msg(const vmesh_msg_t *m, float rssi, float snr,
         : m->msg_type == VMESH_MT_ATTEST
             ? (m->hazard_type == VMESH_VERDICT_CONFIRM ? "ATTEST+"
                                                        : "ATTEST-")
+        : m->msg_type == VMESH_MT_HELLO ? "Hello"
         : m->channel == VMESH_CH_LOCAL ? vmesh_local_name(m->hazard_type)
                                        : "msg";
     printf("[rx %s] %-9s %08X/%-5u hops=%u rssi=%.0f snr=%.1f",

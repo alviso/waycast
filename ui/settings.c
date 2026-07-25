@@ -40,6 +40,8 @@ static lv_obj_t *s_fw_lbl, *s_fw_btn_lbl;
 static lv_obj_t *s_kb, *s_pass_ta, *s_join_panel, *s_join_title;
 static lv_timer_t *s_poll;
 static char s_sel_ssid[33];
+static bool s_editing_handle; /* join panel doubles as the callsign editor */
+static lv_obj_t *s_hd_lbl;    /* callsign row in the main panel */
 static bool s_scanning;
 
 static void close_cb(lv_event_t *e)
@@ -54,10 +56,32 @@ static void close_cb(lv_event_t *e)
 static void join_go_cb(lv_event_t *e)
 {
     (void)e;
-    const vmesh_wifi_ops_t *w = vmesh_wifi_ops();
-    if (w && w->connect)
-        w->connect(s_sel_ssid, lv_textarea_get_text(s_pass_ta));
+    if (s_editing_handle) {
+        const char *hd = lv_textarea_get_text(s_pass_ta);
+        vmesh_set_own_handle(hd);
+        waycast_save_handle(hd);
+        if (s_hd_lbl)
+            lv_label_set_text_fmt(s_hd_lbl, "callsign: %s",
+                                  hd[0] ? hd : "(none)");
+    } else {
+        const vmesh_wifi_ops_t *w = vmesh_wifi_ops();
+        if (w && w->connect)
+            w->connect(s_sel_ssid, lv_textarea_get_text(s_pass_ta));
+    }
     lv_obj_add_flag(s_join_panel, LV_OBJ_FLAG_HIDDEN);
+}
+
+/* open the shared panel as the callsign editor */
+static void handle_edit_cb(lv_event_t *e)
+{
+    (void)e;
+    s_editing_handle = true;
+    lv_label_set_text(s_join_title, "Your callsign (shown to others)");
+    lv_textarea_set_password_mode(s_pass_ta, false);
+    lv_textarea_set_max_length(s_pass_ta, 15);
+    lv_textarea_set_placeholder_text(s_pass_ta, "e.g. bluewagon");
+    lv_textarea_set_text(s_pass_ta, vmesh_own_handle());
+    lv_obj_remove_flag(s_join_panel, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void join_cancel_cb(lv_event_t *e)
@@ -87,7 +111,11 @@ static void net_click_cb(lv_event_t *e)
             return;
         }
     }
+    s_editing_handle = false;
     lv_label_set_text_fmt(s_join_title, "Join \"%s\"", s_sel_ssid);
+    lv_textarea_set_password_mode(s_pass_ta, true);
+    lv_textarea_set_max_length(s_pass_ta, 0);
+    lv_textarea_set_placeholder_text(s_pass_ta, "password");
     lv_textarea_set_text(s_pass_ta, "");
     lv_obj_remove_flag(s_join_panel, LV_OBJ_FLAG_HIDDEN);
 }
@@ -320,6 +348,28 @@ void settings_open(void)
         lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_style_text_font(l, &lv_font_montserrat_14, 0);
         lv_obj_center(l);
+    }
+
+    /* callsign row — identity is a label, not an account (§7¾) */
+    s_hd_lbl = lv_label_create(card);
+    lv_label_set_text_fmt(s_hd_lbl, "callsign: %s",
+                          vmesh_own_handle()[0] ? vmesh_own_handle()
+                                                : "(none)");
+    lv_obj_set_style_text_font(s_hd_lbl, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(s_hd_lbl, lv_color_hex(0xADB5BD), 0);
+    lv_obj_align(s_hd_lbl, LV_ALIGN_BOTTOM_LEFT, lv_pct(4), -196);
+    {
+        lv_obj_t *hb = lv_button_create(card);
+        lv_obj_set_size(hb, lv_pct(29), 40);
+        lv_obj_align(hb, LV_ALIGN_BOTTOM_RIGHT, lv_pct(-4), -188);
+        lv_obj_set_style_bg_color(hb, lv_color_hex(0x22262E), 0);
+        lv_obj_set_style_border_width(hb, 1, 0);
+        lv_obj_set_style_border_color(hb, lv_color_hex(0x3B4252), 0);
+        lv_obj_add_event_cb(hb, handle_edit_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_t *hl = lv_label_create(hb);
+        lv_label_set_text(hl, LV_SYMBOL_EDIT " Callsign");
+        lv_obj_set_style_text_font(hl, &lv_font_montserrat_14, 0);
+        lv_obj_center(hl);
     }
 
     /* firmware row — only when a target registered fw ops (device) */

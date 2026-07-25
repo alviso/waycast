@@ -112,6 +112,27 @@ void waycast_save_loc(double lat, double lon)
     nvs_commit(h);
     nvs_close(h);
 }
+/* pseudonym handle (§7¾): saved by the settings editor, restored at
+ * boot. 15 chars + NUL, matching the names cache. */
+void waycast_save_handle(const char *hd)
+{
+    nvs_handle_t h;
+    if (nvs_open("waycast", NVS_READWRITE, &h) != ESP_OK) return;
+    nvs_set_str(h, "handle", hd ? hd : "");
+    nvs_commit(h);
+    nvs_close(h);
+}
+static void waycast_load_handle(char *out, size_t cap)
+{
+    nvs_handle_t h;
+    out[0] = 0;
+    if (nvs_open("waycast", NVS_READONLY, &h) == ESP_OK) {
+        size_t len = cap;
+        nvs_get_str(h, "handle", out, &len);
+        nvs_close(h);
+    }
+}
+
 /* own message seq across reboots — a reset seq collides with the
  * network's dedup (origin/seq pairs already seen get dropped). Saved
  * at bump time, BEFORE the frame is transmitted. */
@@ -296,6 +317,11 @@ void app_main(void)
     lv_display_set_rotation(lv_display_get_default(), LV_DISPLAY_ROTATION_270);
     scenario_set_demo(waycast_load_demo()); /* real mode unless saved on */
     scenario_set_own_seq(waycast_load_seq() + 4); /* +4: NVS-commit slack */
+    {
+        char hd[16];
+        waycast_load_handle(hd, sizeof(hd));
+        vmesh_set_own_handle(hd);
+    }
     {   /* open at the last-known position (stale) until GPS locks */
         double la, lo;
         if (waycast_load_loc(&la, &lo)) vmesh_pose_set_boot(la, lo);

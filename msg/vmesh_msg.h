@@ -29,6 +29,12 @@ enum {
     VMESH_MT_ATTEST = 4,   /* corroboration vote about another message
                               (plan §7¾): ref_origin/ref_seq name the
                               target, hazard_type carries the verdict */
+    VMESH_MT_HELLO  = 7,   /* identity: note = the sender's handle
+                              (§7¾ locally persistent pseudonym; a
+                              label on origin_id, never a key). Sent
+                              on boot + every ~10 min; receivers cache
+                              origin→handle and FORGET after 24 h —
+                              ephemerality applies to names too. */
 };
 
 /* ATTEST verdicts (carried in hazard_type) */

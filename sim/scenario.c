@@ -27,6 +27,34 @@ static uint32_t s_own_origin = OWN_ORIGIN_ID;
 void scenario_set_own_origin(uint32_t id) { if (id) s_own_origin = id; }
 uint32_t scenario_own_origin(void) { return s_own_origin; }
 
+/* Own handle (§7¾ pseudonym): a label riding HELLO frames. Persisted
+ * by the device target (NVS); weak no-op in the sim. */
+static char s_own_handle[16];
+void __attribute__((weak)) waycast_save_handle(const char *h) { (void)h; }
+void vmesh_set_own_handle(const char *h)
+{
+    snprintf(s_own_handle, sizeof(s_own_handle), "%s", h ? h : "");
+}
+const char *vmesh_own_handle(void) { return s_own_handle; }
+
+void scenario_make_own_hello(vmesh_msg_t *m)
+{
+    memset(m, 0, sizeof(*m));
+    m->version = VMESH_PROTO_VERSION;
+    m->msg_type = VMESH_MT_HELLO;
+    m->channel = VMESH_CH_SAFETY;
+    m->origin_id = s_own_origin;
+    m->seq = next_own_seq();
+    vmesh_pose_t p;
+    vmesh_pose_get(&p);
+    m->lat_e7 = (int32_t)(p.lat * 1e7);
+    m->lon_e7 = (int32_t)(p.lon * 1e7);
+    m->created_s = vmesh_time_s();
+    m->ttl_s = 900;
+    m->radius_m_x10 = 500; /* 5 km — names are local knowledge */
+    snprintf(m->note, sizeof(m->note), "%s", s_own_handle);
+}
+
 /* Own message seq persists across reboots (a boot-reset seq lets the
  * network's dedup silently eat a fresh report that reuses an already-
  * seen origin/seq pair). Device target persists via NVS; sim no-op. */

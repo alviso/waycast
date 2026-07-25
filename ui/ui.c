@@ -1,6 +1,7 @@
 #include "ui.h"
 #include "feed.h"
 #include "hazard_store.h"
+#include "names.h"
 #include "vmesh_mesh.h" /* vmesh_clock_normalize */
 #include <string.h>
 
@@ -190,12 +191,17 @@ static void show_detail(hazard_t *h)
     lv_obj_set_style_text_color(title, lv_color_white(), 0);
 
     lv_obj_t *body = lv_label_create(detail_panel);
+    const char *who = names_get(h->msg.origin_id, now);
+    char wholine[32] = "";
+    if (who)
+        snprintf(wholine, sizeof(wholine), "\nreported by %s", who);
     lv_label_set_text_fmt(body,
         "%s\n%d m away - reported %d min %02d s ago\n"
-        "expires in %d min - heard at hop %d%s",
+        "expires in %d min - heard at hop %d%s%s",
         h->msg.note[0] ? h->msg.note : "(no details)",
         dist_m, age_s / 60, age_s % 60,
         left_s > 0 ? left_s / 60 : 0, h->msg.hops,
+        wholine,
         h->echoed ? "\n" LV_SYMBOL_OK " heard by town" : "");
     lv_obj_set_style_text_color(body, lv_color_hex(0xADB5BD), 0);
     lv_obj_align_to(body, title, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
@@ -667,6 +673,10 @@ static void ui_tick_cb(lv_timer_t *t)
          * vmesh_clock_normalize — receivers trust reception time
          * over implausible sender stamps) */
         vmesh_clock_normalize(&m, now);
+        if (m.msg_type == VMESH_MT_HELLO) {
+            names_note(m.origin_id, m.note, now);
+            continue;
+        }
         if (m.msg_type == VMESH_MT_BEACON) {
             /* anchor presence: refresh the "town near" indicator.
              * Deliberately no clock/radius gates — presence is about
@@ -706,6 +716,21 @@ static void ui_tick_cb(lv_timer_t *t)
     }
 
     hazard_store_prune(now, map_view_drop_chip);
+
+    /* HELLO cadence: our handle onto the air shortly after boot (radio
+     * is up by then), then every 10 min. Silent if no handle is set. */
+    {
+        static uint32_t last_hello_ms;
+        uint32_t up_ms = lv_tick_get();
+        bool due = last_hello_ms == 0 ? up_ms > 15000
+                                      : lv_tick_elaps(last_hello_ms) > 600000;
+        if (due && vmesh_own_handle()[0]) {
+            last_hello_ms = up_ms ? up_ms : 1;
+            vmesh_msg_t hello;
+            scenario_make_own_hello(&hello);
+            vmesh_feed_publish(&hello);
+        }
+    }
 
     /* OTA download shroud: while flash is being written, big map
      * redraws collide with erase stalls and tear the panel — a near-
