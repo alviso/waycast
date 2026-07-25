@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build the car device — Waycast</title>
+<meta name="description" content="Step-by-step Waycast build guides — car device, town node, workstation.">
+<style>
+:root{--ground:#101318;--panel:#171B22;--line:#262C36;--text:#E7ECF2;
+--muted:#8B95A3;--dim:#5C6672;--signal:#F59F00}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);
+color:var(--text);font:16px/1.65 -apple-system,"Segoe UI",Roboto,sans-serif}
+nav{border-bottom:1px solid var(--line);padding:14px 0}
+nav .wrap,main{max-width:760px;margin:0 auto;padding:0 20px}
+nav a{color:var(--muted);text-decoration:none;margin-right:18px}
+nav a:hover{color:var(--text)}
+nav .brand{font-weight:800;letter-spacing:.06em;color:var(--text)}
+nav .brand span{color:var(--signal)}
+main{padding:32px 20px 64px}
+h1{font-size:32px;line-height:1.2}h2{margin-top:40px;font-size:22px}
+a{color:var(--signal);text-decoration:none}a:hover{text-decoration:underline}
+code{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+padding:1px 5px;font-size:14px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+padding:14px;overflow-x:auto}pre code{border:0;background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:16px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;
+font-size:15px}th{color:var(--muted)}
+blockquote{border-left:3px solid var(--signal);margin:16px 0;
+padding:2px 16px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:24px 20px;color:var(--dim);
+text-align:center;font-size:14px}
+</style></head><body>
+<nav><div class="wrap">
+<a class="brand" href="/">WAY<span>CAST</span></a>
+<a href="/wiki/">Build guides</a>
+<a href="https://github.com/alviso/waycast">GitHub</a>
+<a href="https://www.reddit.com/r/waycast/">r/waycast</a>
+</div></nav>
+<main><h1 id="build-the-car-device">Build the car device</h1>
+<p>The in-car unit: 7" touchscreen, offline map, GPS navigation, two-tap
+hazard reports over LoRa. No soldering; one jumper cap moves.</p>
+<h2 id="1-order-the-parts">1. Order the parts</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Where</th>
+<th>~Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Waveshare ESP32-P4-Module-DEV-KIT</strong> (7" 720×1280 touch)</td>
+<td><a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm">Waveshare product page</a></td>
+<td>$60–75</td>
+</tr>
+<tr>
+<td><strong>Waveshare USB-TO-LoRa-xF</strong> dongle — <strong>HF version</strong> (915 MHz), SX1262, TCXO</td>
+<td><a href="https://www.waveshare.com/wiki/USB-TO-LoRa-xF">Waveshare wiki + buy links</a></td>
+<td>$25</td>
+</tr>
+<tr>
+<td><strong>VK-172 USB GPS</strong> (u-blox 7)</td>
+<td>search "VK-172" on Amazon/AliExpress</td>
+<td>$10–15</td>
+</tr>
+<tr>
+<td><strong>microSD card</strong>, 8 GB+ (any brand)</td>
+<td>anywhere</td>
+<td>$8</td>
+</tr>
+<tr>
+<td>USB-C power supply (car: any 15 W+ USB-C adapter)</td>
+<td>anywhere</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>HF vs LF:</strong> the dongle comes in HF (850–930 MHz) and LF (410–490
+MHz) versions. For the US mesh you want <strong>HF</strong>. Two dongles make a
+bench pair — worth ordering a spare.</p>
+</blockquote>
+<h2 id="2-the-one-hardware-step-the-usb-hub-jumper">2. The one hardware step: the USB hub jumper</h2>
+<p>Out of the box, only ONE of the kit's four USB-A ports works — the
+factory jumper bypasses the onboard USB hub. You need two ports (GPS +
+LoRa), so:</p>
+<ol>
+<li>Find the <strong>H3</strong> 3-pin jumper header near the USB-A stack (next to
+   the FSUSB42UMX chip).</li>
+<li>Move the cap to the <strong>other pair</strong> of pins (SEL=L → hub enabled).</li>
+<li>Result: <strong>three</strong> live USB-A ports through the hub. (The port that
+   worked before goes dead in this position — that's expected.)</li>
+</ol>
+<p>No firmware change needed — the firmware already handles the hub.</p>
+<h2 id="3-configure-the-lora-dongle-once-on-any-computer">3. Configure the LoRa dongle (once, on any computer)</h2>
+<p>The dongle ships tuned to <strong>868 MHz (channel 18)</strong> — the mesh lives at
+<strong>915 MHz (channel 65)</strong>. Fix it over the dongle's serial port
+(115200 baud, every command ends with CRLF):</p>
+<pre><code>+++
+AT+TXCH=65
+AT+RXCH=65
+AT+EXIT
+</code></pre>
+<p>Any serial terminal works (<code>screen /dev/cu.usbmodem* 115200</code>, PuTTY,
+the Waveshare SSCOM tool). You should see <code>OK</code> after each command.</p>
+<blockquote>
+<p>⚠️ Never hold the dongle's <strong>KEY button</strong> — 2 seconds silently
+restores factory settings (back to 868 MHz).</p>
+</blockquote>
+<h2 id="4-install-esp-idf-v55">4. Install ESP-IDF v5.5</h2>
+<p>The firmware builds with Espressif's ESP-IDF, version <strong>5.5</strong>:</p>
+<pre><code class="language-sh">git clone -b v5.5 --recursive https://github.com/espressif/esp-idf.git ~/esp/esp-idf
+cd ~/esp/esp-idf &amp;&amp; ./install.sh esp32p4
+</code></pre>
+<p>(Full official guide: <a href="https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32p4/get-started/">ESP-IDF Get Started</a>.)</p>
+<h2 id="5-build-and-flash">5. Build and flash</h2>
+<p>Connect the kit's <strong>USB-C debug port</strong> to your computer, then:</p>
+<pre><code class="language-sh">git clone https://github.com/alviso/waycast.git
+cd waycast/targets/esp32p4
+. ~/esp/esp-idf/export.sh
+idf.py set-target esp32p4
+idf.py build
+idf.py flash
+</code></pre>
+<p>First flash takes a few minutes (it writes the map-tile fallback
+partition too). <strong>This is the only USB flash you'll ever need</strong> — the
+partition table is A/B and every later update arrives over the air
+(Settings → Check update), with automatic rollback if an update
+misbehaves.</p>
+<h2 id="6-first-boot-checklist">6. First boot checklist</h2>
+<p>Insert the microSD, plug GPS + LoRa dongles into the hub ports, power
+on. You should see:</p>
+<ul>
+<li>the map (grid or demo tiles at first — real tiles come next)</li>
+<li>bottom-left diagnostics: <code>USB GPS: … | LoRa(C): open …</code></li>
+<li>top-left: <code>GPS acquiring</code> (amber) → <code>GPS live</code> (green) once it sees
+  sky — first fix takes 1–2 minutes outdoors</li>
+</ul>
+<h2 id="7-load-offline-maps">7. Load offline maps</h2>
+<p>Easiest: on the device. Tap the status badges (top-left) → <strong>Wi-Fi &amp;
+maps</strong> → join your Wi-Fi → tap a coverage tier:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Coverage</th>
+<th>Size</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Near</td>
+<td>15 km, full detail</td>
+<td>~140 MB</td>
+<td>~15 min</td>
+</tr>
+<tr>
+<td>Region</td>
+<td>60 km, detail tapers</td>
+<td>~330 MB</td>
+<td>~30 min</td>
+</tr>
+<tr>
+<td>Wide</td>
+<td>120 km</td>
+<td>~1 GB</td>
+<td>hours</td>
+</tr>
+</tbody>
+</table>
+<p>Tiles land on the card and stay there. (Map data © OpenStreetMap
+contributors.)</p>
+<h2 id="8-done-now-what">8. Done — now what?</h2>
+<ul>
+<li>Report something (the orange button, two taps). If a town node is in
+  range you'll see <strong>⌂ its name</strong> in the status bar, and your report's
+  chip gets a <strong>green dot</strong> when the town confirms it heard you.</li>
+<li>Build your town a <a href="town-node.html">town node</a> — a mesh with memory
+  beats two cars shouting.</li>
+<li>Something weird? <a href="troubleshooting.html">Troubleshooting</a>.</li>
+</ul></main>
+<footer>WAYCAST &middot; open firmware (GPLv3) &middot;
+map data &copy; OpenStreetMap contributors</footer>
+</body></html>

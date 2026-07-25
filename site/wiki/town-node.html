@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build a town node — Waycast</title>
+<meta name="description" content="Step-by-step Waycast build guides — car device, town node, workstation.">
+<style>
+:root{--ground:#101318;--panel:#171B22;--line:#262C36;--text:#E7ECF2;
+--muted:#8B95A3;--dim:#5C6672;--signal:#F59F00}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);
+color:var(--text);font:16px/1.65 -apple-system,"Segoe UI",Roboto,sans-serif}
+nav{border-bottom:1px solid var(--line);padding:14px 0}
+nav .wrap,main{max-width:760px;margin:0 auto;padding:0 20px}
+nav a{color:var(--muted);text-decoration:none;margin-right:18px}
+nav a:hover{color:var(--text)}
+nav .brand{font-weight:800;letter-spacing:.06em;color:var(--text)}
+nav .brand span{color:var(--signal)}
+main{padding:32px 20px 64px}
+h1{font-size:32px;line-height:1.2}h2{margin-top:40px;font-size:22px}
+a{color:var(--signal);text-decoration:none}a:hover{text-decoration:underline}
+code{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+padding:1px 5px;font-size:14px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+padding:14px;overflow-x:auto}pre code{border:0;background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:16px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;
+font-size:15px}th{color:var(--muted)}
+blockquote{border-left:3px solid var(--signal);margin:16px 0;
+padding:2px 16px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:24px 20px;color:var(--dim);
+text-align:center;font-size:14px}
+</style></head><body>
+<nav><div class="wrap">
+<a class="brand" href="/">WAY<span>CAST</span></a>
+<a href="/wiki/">Build guides</a>
+<a href="https://github.com/alviso/waycast">GitHub</a>
+<a href="https://www.reddit.com/r/waycast/">r/waycast</a>
+</div></nav>
+<main><h1 id="build-a-town-node">Build a town node</h1>
+<p>The anchor of a Waycast town: it hears every report in range, relays
+valid ones, injects official National Weather Service alerts into the
+mesh, and announces itself once a minute so passing cars show
+<strong>⌂ your town's name</strong>. Runs unattended — it's a set-and-forget
+appliance.</p>
+<h2 id="1-order-the-parts">1. Order the parts</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Where</th>
+<th>~Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Raspberry Pi 4 or 5</strong> (2 GB is plenty) + SD card + PSU</td>
+<td><a href="https://www.raspberrypi.com/products/">raspberrypi.com</a></td>
+<td>$50–80</td>
+</tr>
+<tr>
+<td><strong>RAK2287 concentrator module</strong> — SPI version, <strong>US915</strong>, with GPS</td>
+<td><a href="https://store.rakwireless.com/products/rak2287-lpwan-gateway-concentrator-module">RAK store</a></td>
+<td>$80–100</td>
+</tr>
+<tr>
+<td><strong>RAK2287 Pi HAT</strong> (the adapter board)</td>
+<td>same page, "Pi HAT" option</td>
+<td>$15–20</td>
+</tr>
+<tr>
+<td><strong>915 MHz antenna</strong> — mount it high; this sets your town's radius</td>
+<td>any 915 MHz fiberglass/whip with the right connector</td>
+<td>$15–50</td>
+</tr>
+<tr>
+<td>Optional: <strong>VK-172 USB GPS</strong></td>
+<td>Amazon/AliExpress</td>
+<td>$10</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Why a concentrator instead of a $25 dongle? The SX1302 hears <strong>all
+spreading factors on 8 channels simultaneously</strong> — a town node
+should hear everyone, always. The GPS variant also gives the node
+its own time and position.</p>
+</blockquote>
+<h2 id="2-prepare-the-pi">2. Prepare the Pi</h2>
+<p>Standard Raspberry Pi OS (64-bit, Lite is fine). Enable SPI:</p>
+<pre><code class="language-sh">sudo raspi-config nonint do_spi 0
+</code></pre>
+<p>Seat the RAK2287 on its Pi HAT, the HAT on the Pi's 40-pin header,
+antenna on the RF port. <strong>Never power the concentrator without an
+antenna attached.</strong></p>
+<h2 id="3-install-waycast">3. Install Waycast</h2>
+<pre><code class="language-sh">git clone https://github.com/alviso/waycast.git
+cd waycast/peer
+./setup.sh
+</code></pre>
+<p><code>setup.sh</code> builds the mesh peer (patching the Semtech HAL for the
+RAK2287's quirks), installs two systemd services, and enables them at
+boot:</p>
+<ul>
+<li><code>waycast-peer</code> — the radio: receive, validate, relay, beacon</li>
+<li><code>waycast-injector</code> — polls NWS and injects active weather alerts</li>
+</ul>
+<h2 id="4-configure-your-town">4. Configure your town</h2>
+<pre><code class="language-sh">sudo cp node.conf.example /etc/waycast/node.conf
+sudo nano /etc/waycast/node.conf
+</code></pre>
+<p>Set three lines:</p>
+<pre><code>NODE_LAT=45.52          # your node's location
+NODE_LON=-122.89
+NODE_NAME=YourTown      # what car screens will show: ⌂ YourTown
+</code></pre>
+<p>(With a USB GPS plugged in, position comes from the GPS instead and
+the config is the fallback.) Then:</p>
+<pre><code class="language-sh">sudo systemctl restart waycast-peer waycast-injector
+</code></pre>
+<h2 id="5-how-you-know-its-working">5. How you know it's working</h2>
+<pre><code class="language-sh">journalctl -u waycast-peer -f
+</code></pre>
+<p>Within a minute you'll see the startup banner
+(<code>vmesh_peer up: 915.0 MHz SF7/125k …</code>). Then:</p>
+<ul>
+<li><strong>Every frame it hears</strong> is logged with frequency, RSSI, and the
+  decoded report: <code>[rx OK ] Crash 01E1902F/7 … rssi=-77</code></li>
+<li><strong><code>[relay]</code> lines</strong> mean it's re-broadcasting valid reports</li>
+<li><strong><code>[inject] tx Weather …</code></strong> appears when NWS has an active alert
+  for your area</li>
+<li>A car device (or a <a href="workstation.html">bench transmitter</a>) in range
+  shows <strong>⌂ YourTown</strong> within a minute — that's the presence beacon</li>
+</ul>
+<h2 id="6-placement-notes">6. Placement notes</h2>
+<p>Range is antenna height and quality, little else. A node on a shelf
+hears a neighborhood; the same node with a fiberglass antenna at roof
+height hears a town. Start indoors to validate, then move it up.</p></main>
+<footer>WAYCAST &middot; open firmware (GPLv3) &middot;
+map data &copy; OpenStreetMap contributors</footer>
+</body></html>

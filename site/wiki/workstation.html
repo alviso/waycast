@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workstation: simulator, tiles, bench radio — Waycast</title>
+<meta name="description" content="Step-by-step Waycast build guides — car device, town node, workstation.">
+<style>
+:root{--ground:#101318;--panel:#171B22;--line:#262C36;--text:#E7ECF2;
+--muted:#8B95A3;--dim:#5C6672;--signal:#F59F00}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);
+color:var(--text);font:16px/1.65 -apple-system,"Segoe UI",Roboto,sans-serif}
+nav{border-bottom:1px solid var(--line);padding:14px 0}
+nav .wrap,main{max-width:760px;margin:0 auto;padding:0 20px}
+nav a{color:var(--muted);text-decoration:none;margin-right:18px}
+nav a:hover{color:var(--text)}
+nav .brand{font-weight:800;letter-spacing:.06em;color:var(--text)}
+nav .brand span{color:var(--signal)}
+main{padding:32px 20px 64px}
+h1{font-size:32px;line-height:1.2}h2{margin-top:40px;font-size:22px}
+a{color:var(--signal);text-decoration:none}a:hover{text-decoration:underline}
+code{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+padding:1px 5px;font-size:14px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+padding:14px;overflow-x:auto}pre code{border:0;background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:16px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;
+font-size:15px}th{color:var(--muted)}
+blockquote{border-left:3px solid var(--signal);margin:16px 0;
+padding:2px 16px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:24px 20px;color:var(--dim);
+text-align:center;font-size:14px}
+</style></head><body>
+<nav><div class="wrap">
+<a class="brand" href="/">WAY<span>CAST</span></a>
+<a href="/wiki/">Build guides</a>
+<a href="https://github.com/alviso/waycast">GitHub</a>
+<a href="https://www.reddit.com/r/waycast/">r/waycast</a>
+</div></nav>
+<main><h1 id="workstation-simulator-tiles-bench-radio">Workstation: simulator, tiles, bench radio</h1>
+<p>Three things your Mac (or Linux box) can do for Waycast — including
+everything short of driving.</p>
+<h2 id="1-run-the-device-ui-with-zero-hardware">1. Run the device UI with zero hardware</h2>
+<p>The full car-device interface runs as a desktop app on a scripted demo
+scenario — hazards appear from a simulated mesh, age, and fade:</p>
+<pre><code class="language-sh">git clone https://github.com/alviso/waycast.git
+cd waycast
+brew install sdl2          # macOS   (Linux: sudo apt install libsdl2-dev)
+make deps                  # fetches LVGL
+make -j8
+make run
+</code></pre>
+<p>This is also where UI development happens — the simulator and the
+device share every line of UI code.</p>
+<h2 id="2-pre-fetch-map-tiles">2. Pre-fetch map tiles</h2>
+<p>If you'd rather fill a card from your computer than wait on the
+device's Wi-Fi:</p>
+<pre><code class="language-sh">python3 scripts/fetch_area_tiles.py --center &lt;lat&gt;,&lt;lon&gt; --preset region
+</code></pre>
+<p>Presets: <code>near</code> (15 km, ~140 MB) / <code>region</code> (60 km, ~330 MB) / <code>wide</code>
+(120 km, ~1 GB). Copy the resulting <code>assets/tiles/</code> folder to the
+card as <code>/tiles/</code>. The script is throttled and resume-safe — please
+keep it that way, and put <strong>your own contact e-mail</strong> in the <code>UA</code>
+string if you fork it (OSM tile policy).</p>
+<h2 id="3-bench-radio-test-a-town-node-from-your-desk">3. Bench radio: test a town node from your desk</h2>
+<p>A second USB-TO-LoRa dongle (configured like the
+<a href="car-device.html#3-configure-the-lora-dongle-once-on-any-computer">car device's</a>)
+turns your computer into a transmitter:</p>
+<pre><code class="language-sh">cd tools/txtool
+cc -o txtool -I ../../msg -I ../../net txtool.c \
+   ../../msg/vmesh_wire.c ../../net/lora_dtu.c
+./txtool /dev/cu.usbmodemXXXX 1 &quot;hello from the bench&quot;
+</code></pre>
+<p>Then watch your <a href="town-node.html">town node</a>'s journal:</p>
+<pre><code class="language-sh">journalctl -u waycast-peer -f
+# → [rx OK ] Debris 02BEEF01/1 … &quot;hello from the bench&quot;
+</code></pre>
+<p>Edit the coordinates in <code>txtool.c</code> to your area first — the mesh
+drops reports outside their relevance radius, by design.</p>
+<blockquote>
+<p>Reading from a dongle on macOS: plain <code>cat /dev/cu.usbmodem…</code> shows
+nothing — the dongle only streams once DTR is asserted. Use a real
+serial terminal (<code>screen</code>, minicom) or see
+<a href="troubleshooting.html">troubleshooting</a>.</p>
+</blockquote></main>
+<footer>WAYCAST &middot; open firmware (GPLv3) &middot;
+map data &copy; OpenStreetMap contributors</footer>
+</body></html>

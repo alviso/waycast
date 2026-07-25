@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Troubleshooting — Waycast</title>
+<meta name="description" content="Step-by-step Waycast build guides — car device, town node, workstation.">
+<style>
+:root{--ground:#101318;--panel:#171B22;--line:#262C36;--text:#E7ECF2;
+--muted:#8B95A3;--dim:#5C6672;--signal:#F59F00}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);
+color:var(--text);font:16px/1.65 -apple-system,"Segoe UI",Roboto,sans-serif}
+nav{border-bottom:1px solid var(--line);padding:14px 0}
+nav .wrap,main{max-width:760px;margin:0 auto;padding:0 20px}
+nav a{color:var(--muted);text-decoration:none;margin-right:18px}
+nav a:hover{color:var(--text)}
+nav .brand{font-weight:800;letter-spacing:.06em;color:var(--text)}
+nav .brand span{color:var(--signal)}
+main{padding:32px 20px 64px}
+h1{font-size:32px;line-height:1.2}h2{margin-top:40px;font-size:22px}
+a{color:var(--signal);text-decoration:none}a:hover{text-decoration:underline}
+code{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+padding:1px 5px;font-size:14px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+padding:14px;overflow-x:auto}pre code{border:0;background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:16px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;
+font-size:15px}th{color:var(--muted)}
+blockquote{border-left:3px solid var(--signal);margin:16px 0;
+padding:2px 16px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:24px 20px;color:var(--dim);
+text-align:center;font-size:14px}
+</style></head><body>
+<nav><div class="wrap">
+<a class="brand" href="/">WAY<span>CAST</span></a>
+<a href="/wiki/">Build guides</a>
+<a href="https://github.com/alviso/waycast">GitHub</a>
+<a href="https://www.reddit.com/r/waycast/">r/waycast</a>
+</div></nav>
+<main><h1 id="troubleshooting">Troubleshooting</h1>
+<p>Every entry here is a trap we personally fell into. Learn from our
+bruises.</p>
+<h2 id="radio-nothing-hears-anything">Radio: nothing hears anything</h2>
+<p><strong>The dongle factory default is 868 MHz.</strong> Waveshare USB-TO-LoRa
+dongles ship on channel 18 (868.125 MHz); the mesh lives on channel
+65 (915.0 MHz). Configure every dongle once — see the
+<a href="car-device.html#3-configure-the-lora-dongle-once-on-any-computer">car device guide</a>.</p>
+<p><strong>The KEY button is a silent factory reset.</strong> Holding a dongle's KEY
+button ~2 s restores factory settings — back to 868 MHz, no
+indication. If a previously-working dongle goes deaf, re-check its
+channel before anything else.</p>
+<p><strong>All radios must match:</strong> channel 65, SF7, BW125. The town node's
+concentrator <em>hears</em> every SF at once (so uplink may work even
+mismatched!) but <em>transmits</em> SF7 — an SF-mismatched dongle hears
+nothing back. If cars reach the node but never see its beacon,
+suspect SF.</p>
+<h2 id="car-device">Car device</h2>
+<p><strong>Only one USB port works.</strong> That's the factory jumper bypassing the
+onboard hub — move <strong>H3</strong> (see the
+<a href="car-device.html#2-the-one-hardware-step-the-usb-hub-jumper">build step</a>).
+Note the previously-working port goes dead after the move; use the
+other three.</p>
+<p><strong>No GPS fix indoors.</strong> Normal — the VK-172 wants sky. In a car it
+locks in 1–2 minutes. The device works fine without a fix: reports
+still send (receivers timestamp them on arrival), you just navigate
+from your last known position until lock.</p>
+<p><strong>Map is a grid.</strong> No tiles for where you are. Download a coverage
+tier (Settings → Wi-Fi &amp; maps) or check the card is FAT32 with tiles
+in <code>/tiles/{z}/{x}/{y}.png</code>.</p>
+<p><strong>Update seemingly failed / device rebooted twice.</strong> That's the
+rollback system doing its job: a new firmware that fails its boot
+self-check is automatically reverted. You're on the previous version;
+nothing is broken. Check for a newer update later.</p>
+<h2 id="town-node">Town node</h2>
+<p><strong><code>journalctl -u waycast-peer</code> shows nothing received, ever.</strong> Check
+antenna (never run without one), SPI enabled (<code>raspi-config</code>), and
+that something is actually transmitting in range — a
+<a href="workstation.html#3-bench-radio-test-a-town-node-from-your-desk">bench transmitter</a>
+two meters away settles it in one command.</p>
+<p><strong>Reports arrive but say <code>[rx drop]</code>.</strong> The drop reason is usually the
+relevance radius — the report's coordinates are too far from your
+node's position. Check <code>NODE_LAT</code>/<code>NODE_LON</code> in
+<code>/etc/waycast/node.conf</code> (a node that thinks it's at 0,0 drops
+everything).</p>
+<p><strong>Node stopped hearing after days of working.</strong> A concentrator RX path
+can wedge (rare). <code>sudo systemctl restart waycast-peer</code> clears it. An
+automatic watchdog is on the roadmap.</p>
+<h2 id="serial-ports-on-macos">Serial ports on macOS</h2>
+<p><strong><code>cat /dev/cu.usbmodem…</code> shows nothing</strong> from a LoRa dongle even
+though its RX LED blinks. <code>cat</code> never asserts DTR, and the dongle
+won't stream without it. Use <code>screen /dev/cu.usbmodem… 115200</code>, or
+any real serial terminal.</p>
+<h2 id="still-stuck">Still stuck?</h2>
+<p>Bring the symptom (and a <code>journalctl</code> snippet or a photo of the
+device's diagnostic line) to
+<a href="https://www.reddit.com/r/waycast/">r/waycast</a> — the diagnostic line
+at the bottom of the device screen exists precisely because someone
+will ask you what it says.</p></main>
+<footer>WAYCAST &middot; open firmware (GPLv3) &middot;
+map data &copy; OpenStreetMap contributors</footer>
+</body></html>
