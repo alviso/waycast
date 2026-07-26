@@ -29,6 +29,9 @@ enum {
     VMESH_MT_ATTEST = 4,   /* corroboration vote about another message
                               (plan §7¾): ref_origin/ref_seq name the
                               target, hazard_type carries the verdict */
+    VMESH_MT_CONVOY = 8,   /* trip-scoped group traffic (ui/convoy.h):
+                              ref_origin = group id (hashed code word),
+                              hazard_type = 0 position / 1 message */
     VMESH_MT_HELLO  = 7,   /* identity: note = the sender's handle
                               (§7¾ locally persistent pseudonym; a
                               label on origin_id, never a key). Sent
@@ -49,6 +52,8 @@ enum {
     VMESH_CH_SAFETY = 0,
     VMESH_CH_TRAFFIC = 1,
     VMESH_CH_LOCAL = 2,    /* events, lodging, fuel, aid — local chatter */
+    VMESH_CH_GROUP = 3,    /* convoy traffic: above LOCAL in the
+                              interrupt ladder, below SAFETY */
 };
 
 /* ---- LOCAL-channel categories ---- */
@@ -76,7 +81,8 @@ enum {
 /* severity: 1 = info, 2 = caution, 3 = danger */
 
 /* types whose wire position slots carry a message reference instead */
-#define VMESH_MT_HAS_REF(t) ((t) == VMESH_MT_ATTEST || \
+#define VMESH_MT_HAS_REF(t) ((t) == VMESH_MT_CONVOY || \
+                             (t) == VMESH_MT_ATTEST || \
                              (t) == VMESH_MT_QUERY  || \
                              (t) == VMESH_MT_REPLY)
 

@@ -1,5 +1,7 @@
 #include "map_view.h"
 #include "scenario.h" /* scenario_own_origin — delivery dot */
+#include "convoy.h"
+#include "names.h"
 #include "feed.h"
 
 #include <math.h>
@@ -602,15 +604,22 @@ void map_view_update(const vmesh_pose_t *pose, uint32_t now_s)
 
         if (!h->chip) {
             bool local = h->msg.channel == VMESH_CH_LOCAL;
+            bool group = h->msg.channel == VMESH_CH_GROUP;
             lv_obj_t *chip = lv_button_create(map);
-            lv_obj_set_size(chip, local ? 46 : 56, local ? 46 : 56);
+            lv_obj_set_size(chip, local || group ? 46 : 56,
+                                  local || group ? 46 : 56);
             lv_obj_set_style_radius(chip, LV_RADIUS_CIRCLE, 0);
             lv_obj_set_style_bg_color(chip,
-                local ? lv_color_hex(LOCAL_PIN_COLOR)
-                      : severity_color(h->msg.severity), 0);
+                group ? lv_color_hex(0x2B3A55)
+                      : local ? lv_color_hex(LOCAL_PIN_COLOR)
+                              : severity_color(h->msg.severity), 0);
             lv_obj_t *lbl = lv_label_create(chip);
-            lv_label_set_text(lbl, local ? local_symbol(h->msg.hazard_type)
-                                         : hz_symbol(h->msg.hazard_type));
+            /* group frames carry a SUBTYPE in hazard_type, not a
+             * hazard id — never run it through hz_symbol() */
+            lv_label_set_text(lbl,
+                group ? LV_SYMBOL_SHUFFLE
+                      : local ? local_symbol(h->msg.hazard_type)
+                              : hz_symbol(h->msg.hazard_type));
             lv_obj_center(lbl);
             lv_obj_add_event_cb(chip, chip_event_cb, LV_EVENT_CLICKED, h);
             /* delivery dot — OWN reports only: red until at least one
@@ -660,5 +669,52 @@ void map_view_update(const vmesh_pose_t *pose, uint32_t now_s)
         bool fresh = (now_s - h->msg.created_s) < 30;
         lv_obj_set_style_border_width(chip, fresh ? 3 : 0, 0);
         lv_obj_set_style_border_color(chip, lv_color_white(), 0);
+    }
+
+    /* convoy members: named dots, the "where did Dave go" answer.
+     * Distinct from hazard chips — smaller, blue-grey, never tappable. */
+    {
+        static lv_obj_t *cm_dot[CONVOY_MAX], *cm_lbl[CONVOY_MAX];
+        for (int i = 0; i < CONVOY_MAX; i++) {
+            convoy_member_t *mb = convoy_slot(i);
+            bool live = mb && mb->origin;
+            if (live && !cm_dot[i]) {
+                cm_dot[i] = lv_obj_create(map);
+                lv_obj_set_size(cm_dot[i], 18, 18);
+                lv_obj_set_style_radius(cm_dot[i], LV_RADIUS_CIRCLE, 0);
+                lv_obj_set_style_bg_color(cm_dot[i],
+                                          lv_color_hex(0x8AB4F8), 0);
+                lv_obj_set_style_border_color(cm_dot[i],
+                                              lv_color_hex(0x14161B), 0);
+                lv_obj_set_style_border_width(cm_dot[i], 2, 0);
+                lv_obj_clear_flag(cm_dot[i], LV_OBJ_FLAG_CLICKABLE);
+                cm_lbl[i] = lv_label_create(map);
+                lv_obj_set_style_text_color(cm_lbl[i],
+                                            lv_color_hex(0x8AB4F8), 0);
+                lv_obj_set_style_text_font(cm_lbl[i],
+                                           &lv_font_montserrat_12, 0);
+                lv_obj_clear_flag(cm_lbl[i], LV_OBJ_FLAG_CLICKABLE);
+            }
+            if (!cm_dot[i]) continue;
+            if (!live) {
+                lv_obj_add_flag(cm_dot[i], LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(cm_lbl[i], LV_OBJ_FLAG_HIDDEN);
+                continue;
+            }
+            lv_obj_remove_flag(cm_dot[i], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(cm_lbl[i], LV_OBJ_FLAG_HIDDEN);
+            int32_t mx = (int32_t)(merc_x(mb->lon, s_zoom) - view_x0);
+            int32_t my = (int32_t)(merc_y(mb->lat, s_zoom) - view_y0);
+            lv_obj_set_pos(cm_dot[i], mx - 9, my - 9);
+            const char *nm = names_get(mb->origin, now_s);
+            char idbuf[12];
+            if (!nm) {
+                snprintf(idbuf, sizeof(idbuf), "%06X",
+                         (unsigned)(mb->origin & 0xFFFFFF));
+                nm = idbuf;
+            }
+            lv_label_set_text(cm_lbl[i], nm);
+            lv_obj_set_pos(cm_lbl[i], mx + 12, my - 8);
+        }
     }
 }

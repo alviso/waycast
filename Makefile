@@ -20,7 +20,7 @@ CFLAGS := -std=c11 -arch $(ARCH) -O2 -g -Wall \
 
 APP_SRCS := \
 	ui/ui.c ui/map_view.c ui/hazard_store.c ui/settings.c ui/names.c \
-	ui/town_square.c \
+	ui/town_square.c ui/convoy.c \
 	msg/vmesh_wire.c mesh/vmesh_mesh.c net/lora_dtu.c net/provision.c \
 	targets/sdl/serial_radio.c targets/sdl/fake_provision.c \
 	sim/scenario.c \

@@ -22,6 +22,7 @@
 #include "feed.h"
 #include "scenario.h"
 #include "ui.h"
+#include "convoy.h"
 
 
 #define VMESH_BENCH_POSE 0 /* RF bench test: pin pose (1 = pin, 0 = driving demo) */
@@ -129,6 +130,27 @@ static void waycast_load_handle(char *out, size_t cap)
     if (nvs_open("waycast", NVS_READONLY, &h) == ESP_OK) {
         size_t len = cap;
         nvs_get_str(h, "handle", out, &len);
+        nvs_close(h);
+    }
+}
+
+/* convoy code word across reboots — a trip can outlive a power cycle
+ * (the convoy itself still dissolves after a day of silence) */
+void waycast_save_convoy(const char *phrase)
+{
+    nvs_handle_t h;
+    if (nvs_open("waycast", NVS_READWRITE, &h) != ESP_OK) return;
+    nvs_set_str(h, "convoy", phrase ? phrase : "");
+    nvs_commit(h);
+    nvs_close(h);
+}
+static void waycast_load_convoy(char *out, size_t cap)
+{
+    nvs_handle_t h;
+    out[0] = 0;
+    if (nvs_open("waycast", NVS_READONLY, &h) == ESP_OK) {
+        size_t len = cap;
+        nvs_get_str(h, "convoy", out, &len);
         nvs_close(h);
     }
 }
@@ -321,6 +343,9 @@ void app_main(void)
         char hd[16];
         waycast_load_handle(hd, sizeof(hd));
         vmesh_set_own_handle(hd);
+        char cw[24];
+        waycast_load_convoy(cw, sizeof(cw));
+        if (cw[0]) convoy_join(cw, vmesh_time_s());
     }
     {   /* open at the last-known position (stale) until GPS locks */
         double la, lo;

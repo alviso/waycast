@@ -43,7 +43,8 @@ hazard_t *hazard_store_ingest(const vmesh_msg_t *m)
 
     /* the store holds anything geo-ephemeral the UI shows: safety
      * hazards and LOCAL-channel notices alike (same dedup + expiry) */
-    if (m->msg_type != VMESH_MT_HAZARD && m->channel != VMESH_CH_LOCAL)
+    if (m->msg_type != VMESH_MT_HAZARD &&
+        m->channel != VMESH_CH_LOCAL && m->channel != VMESH_CH_GROUP)
         return NULL;
 
     int free_slot = -1;

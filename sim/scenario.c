@@ -39,12 +39,12 @@ void vmesh_set_own_handle(const char *h)
 }
 const char *vmesh_own_handle(void) { return s_own_handle; }
 
-void scenario_make_own_hello(vmesh_msg_t *m)
+/* fill the "who/where/when" of an own frame: identity, a fresh seq,
+ * current pose and clock. Callers set type/channel/payload. */
+void scenario_stamp_own(vmesh_msg_t *m)
 {
     memset(m, 0, sizeof(*m));
     m->version = VMESH_PROTO_VERSION;
-    m->msg_type = VMESH_MT_HELLO;
-    m->channel = VMESH_CH_SAFETY;
     m->origin_id = s_own_origin;
     m->seq = next_own_seq();
     vmesh_pose_t p;
@@ -52,6 +52,13 @@ void scenario_make_own_hello(vmesh_msg_t *m)
     m->lat_e7 = (int32_t)(p.lat * 1e7);
     m->lon_e7 = (int32_t)(p.lon * 1e7);
     m->created_s = vmesh_time_s();
+}
+
+void scenario_make_own_hello(vmesh_msg_t *m)
+{
+    scenario_stamp_own(m);
+    m->msg_type = VMESH_MT_HELLO;
+    m->channel = VMESH_CH_SAFETY;
     m->ttl_s = 900;
     m->radius_m_x10 = 500; /* 5 km — names are local knowledge */
     snprintf(m->note, sizeof(m->note), "%s", s_own_handle);

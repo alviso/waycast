@@ -42,12 +42,14 @@ void vmesh_set_own_handle(const char *h); /* pseudonym (§7¾) */
 const char *vmesh_own_handle(void);
 void waycast_save_handle(const char *h); /* weak no-op in sim; NVS on device */
 void scenario_make_own_hello(vmesh_msg_t *m);
+void scenario_stamp_own(vmesh_msg_t *m); /* identity+seq+pose+clock */
 uint32_t scenario_own_origin(void);
 void scenario_set_own_seq(uint16_t seq); /* boot restore (NVS) */
 void vmesh_set_own_handle(const char *h); /* pseudonym (§7¾) */
 const char *vmesh_own_handle(void);
 void waycast_save_handle(const char *h); /* weak no-op in sim; NVS on device */
 void scenario_make_own_hello(vmesh_msg_t *m);
+void scenario_stamp_own(vmesh_msg_t *m); /* identity+seq+pose+clock */
 
 void scenario_make_own_query(vmesh_msg_t *m, uint32_t place_origin,
                              const char *question);

@@ -16,6 +16,8 @@
 #include "provision.h"
 #include "settings.h"
 #include "scenario.h" /* demo-mode toggle */
+#include "convoy.h"
+#include "feed.h"  /* vmesh_time_s */
 
 /* persisted by the device target (NVS); weak no-op in the SDL sim */
 void __attribute__((weak)) waycast_save_demo(bool on) { (void)on; }
@@ -40,8 +42,11 @@ static lv_obj_t *s_fw_lbl, *s_fw_btn_lbl;
 static lv_obj_t *s_kb, *s_pass_ta, *s_join_panel, *s_join_title;
 static lv_timer_t *s_poll;
 static char s_sel_ssid[33];
-static bool s_editing_handle; /* join panel doubles as the callsign editor */
-static lv_obj_t *s_hd_lbl;    /* callsign row in the main panel */
+/* the keyboard panel serves three jobs: Wi-Fi password, callsign,
+ * convoy code word */
+enum { PANEL_WIFI = 0, PANEL_HANDLE, PANEL_CONVOY };
+static int s_panel_mode;
+static lv_obj_t *s_hd_lbl, *s_cv_lbl; /* callsign + convoy rows */
 static bool s_scanning;
 
 static void close_cb(lv_event_t *e)
@@ -56,13 +61,20 @@ static void close_cb(lv_event_t *e)
 static void join_go_cb(lv_event_t *e)
 {
     (void)e;
-    if (s_editing_handle) {
+    if (s_panel_mode == PANEL_HANDLE) {
         const char *hd = lv_textarea_get_text(s_pass_ta);
         vmesh_set_own_handle(hd);
         waycast_save_handle(hd);
         if (s_hd_lbl)
             lv_label_set_text_fmt(s_hd_lbl, "callsign: %s",
                                   hd[0] ? hd : "(none)");
+    } else if (s_panel_mode == PANEL_CONVOY) {
+        const char *cw = lv_textarea_get_text(s_pass_ta);
+        convoy_join(cw, vmesh_time_s());
+        if (s_cv_lbl)
+            lv_label_set_text_fmt(s_cv_lbl, "convoy: %s",
+                                  convoy_active() ? convoy_phrase()
+                                                  : "(none)");
     } else {
         const vmesh_wifi_ops_t *w = vmesh_wifi_ops();
         if (w && w->connect)
@@ -75,7 +87,7 @@ static void join_go_cb(lv_event_t *e)
 static void handle_edit_cb(lv_event_t *e)
 {
     (void)e;
-    s_editing_handle = true;
+    s_panel_mode = PANEL_HANDLE;
     lv_label_set_text(s_join_title, "Your callsign (shown to others)");
     lv_textarea_set_password_mode(s_pass_ta, false);
     lv_textarea_set_max_length(s_pass_ta, 15);
@@ -111,7 +123,7 @@ static void net_click_cb(lv_event_t *e)
             return;
         }
     }
-    s_editing_handle = false;
+    s_panel_mode = PANEL_WIFI;
     lv_label_set_text_fmt(s_join_title, "Join \"%s\"", s_sel_ssid);
     lv_textarea_set_password_mode(s_pass_ta, true);
     lv_textarea_set_max_length(s_pass_ta, 0);
@@ -184,6 +196,20 @@ static void dl_tier_cb(lv_event_t *e)
     }
     lv_obj_remove_flag(s_dl_bar, LV_OBJ_FLAG_HIDDEN);
     lv_label_set_text(s_dl_lbl, "starting...");
+}
+
+/* code word in, convoy joined — that's the entire handshake */
+static void convoy_edit_cb(lv_event_t *e)
+{
+    (void)e;
+    s_panel_mode = PANEL_CONVOY;
+    lv_label_set_text(s_join_title,
+                      "Convoy code word (everyone types the same)");
+    lv_textarea_set_password_mode(s_pass_ta, false);
+    lv_textarea_set_max_length(s_pass_ta, 23);
+    lv_textarea_set_placeholder_text(s_pass_ta, "e.g. oregon coast run");
+    lv_textarea_set_text(s_pass_ta, convoy_phrase());
+    lv_obj_remove_flag(s_join_panel, LV_OBJ_FLAG_HIDDEN);
 }
 
 /* ---- firmware update (device only; sim registers no fw ops) ---- */
@@ -370,6 +396,25 @@ void settings_open(void)
         lv_label_set_text(hl, LV_SYMBOL_EDIT " Callsign");
         lv_obj_set_style_text_font(hl, &lv_font_montserrat_14, 0);
         lv_obj_center(hl);
+    }
+
+    /* convoy row — trip-scoped groups, joined by code word */
+    s_cv_lbl = lv_label_create(card);
+    lv_label_set_text_fmt(s_cv_lbl, "convoy: %s",
+                          convoy_active() ? convoy_phrase() : "(none)");
+    lv_obj_set_style_text_font(s_cv_lbl, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(s_cv_lbl, lv_color_hex(0xADB5BD), 0);
+    lv_obj_align(s_cv_lbl, LV_ALIGN_BOTTOM_LEFT, lv_pct(4), -246);
+    {
+        lv_obj_t *cb = lv_button_create(card);
+        lv_obj_set_size(cb, lv_pct(29), 40);
+        lv_obj_align(cb, LV_ALIGN_BOTTOM_RIGHT, lv_pct(-4), -238);
+        lv_obj_set_style_bg_color(cb, lv_color_hex(0x2B3A55), 0);
+        lv_obj_add_event_cb(cb, convoy_edit_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_t *cl = lv_label_create(cb);
+        lv_label_set_text(cl, LV_SYMBOL_SHUFFLE " Convoy");
+        lv_obj_set_style_text_font(cl, &lv_font_montserrat_14, 0);
+        lv_obj_center(cl);
     }
 
     /* firmware row — only when a target registered fw ops (device) */

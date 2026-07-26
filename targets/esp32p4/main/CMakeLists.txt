@@ -19,6 +19,7 @@ idf_component_register(
         ${REPO}/ui/map_view.c
         ${REPO}/ui/hazard_store.c
         ${REPO}/ui/names.c
+        ${REPO}/ui/convoy.c
         ${REPO}/msg/vmesh_wire.c
         ${REPO}/mesh/vmesh_mesh.c
         ${REPO}/sim/scenario.c

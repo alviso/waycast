@@ -2,6 +2,7 @@
 #include "feed.h"
 #include "hazard_store.h"
 #include "names.h"
+#include "convoy.h"
 #include "vmesh_mesh.h" /* vmesh_clock_normalize */
 #include <string.h>
 
@@ -40,6 +41,8 @@ static lv_obj_t *report_btn;
 static lv_obj_t *report_overlay; /* S2 */
 static lv_obj_t *detail_panel;   /* S3 */
 static lv_obj_t *about_overlay;  /* S5 */
+static lv_obj_t *lbl_convoy;     /* status-bar convoy chip */
+static lv_obj_t *convoy_sheet;   /* member list + quick words */
 
 #define VMESH_FW_VERSION "0.1.0-phase0"
 
@@ -179,7 +182,9 @@ static void show_detail(hazard_t *h)
     lv_obj_add_event_cb(detail_panel, detail_close_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *title = lv_label_create(detail_panel);
-    if (h->msg.channel == VMESH_CH_LOCAL)
+    if (h->msg.channel == VMESH_CH_GROUP)
+        lv_label_set_text(title, "Convoy message");
+    else if (h->msg.channel == VMESH_CH_LOCAL)
         lv_label_set_text_fmt(title, "%s  (local notice)",
                               vmesh_msg_name(h->msg.channel,
                                              h->msg.hazard_type));
@@ -662,6 +667,123 @@ static void update_info_panel(const vmesh_pose_t *pose, uint32_t now)
 
 /* ---------------- feed pump + per-tick refresh ---------------- */
 
+/* ---------------- convoy sheet ---------------- */
+
+static void convoy_sheet_close(lv_event_t *e)
+{
+    (void)e;
+    if (convoy_sheet) { lv_obj_delete(convoy_sheet); convoy_sheet = NULL; }
+}
+
+static void convoy_say_cb(lv_event_t *e)
+{
+    const char *phrase = (const char *)lv_event_get_user_data(e);
+    vmesh_msg_t m;
+    if (convoy_make_message(&m, phrase)) vmesh_feed_publish(&m);
+    convoy_sheet_close(NULL);
+}
+
+static void convoy_leave_cb(lv_event_t *e)
+{
+    (void)e;
+    convoy_leave();
+    convoy_sheet_close(NULL);
+}
+
+static void convoy_sheet_open(lv_event_t *e)
+{
+    (void)e;
+    if (convoy_sheet || !convoy_active()) return;
+    uint32_t now = vmesh_time_s();
+    vmesh_pose_t pose;
+    vmesh_pose_get(&pose);
+
+    convoy_sheet = lv_obj_create(lv_screen_active());
+    lv_obj_set_size(convoy_sheet, lv_pct(56), LV_SIZE_CONTENT);
+    lv_obj_align(convoy_sheet, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(convoy_sheet, lv_color_hex(0x22262E), 0);
+    lv_obj_set_style_border_color(convoy_sheet, lv_color_hex(0x3B4252), 0);
+    lv_obj_set_style_radius(convoy_sheet, 12, 0);
+    lv_obj_clear_flag(convoy_sheet, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *title = lv_label_create(convoy_sheet);
+    lv_label_set_text_fmt(title, "Convoy \"%s\"", convoy_phrase());
+    lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
+    lv_obj_set_style_text_color(title, lv_color_white(), 0);
+
+    /* who's out there: name (if we've heard their HELLO) + distance */
+    lv_obj_t *anchor = title;
+    int shown = 0;
+    for (int i = 0; i < CONVOY_MAX; i++) {
+        convoy_member_t *mb = convoy_slot(i);
+        if (!mb || !mb->origin) continue;
+        double dy = (mb->lat - pose.lat) * 110540.0;
+        double dx = (mb->lon - pose.lon) * 111320.0 *
+                    cos(pose.lat * M_PI / 180.0);
+        char dist[16];
+        fmt_dist(dist, sizeof(dist), sqrt(dx * dx + dy * dy));
+        const char *nm = names_get(mb->origin, now);
+        char idbuf[12];
+        if (!nm) {
+            snprintf(idbuf, sizeof(idbuf), "%06X", mb->origin & 0xFFFFFF);
+            nm = idbuf;
+        }
+        lv_obj_t *row = lv_label_create(convoy_sheet);
+        lv_label_set_text_fmt(row, LV_SYMBOL_GPS "  %s - %s (%us ago)",
+                              nm, dist, (unsigned)(now - mb->heard_s));
+        lv_obj_set_style_text_color(row, lv_color_hex(0xADB5BD), 0);
+        lv_obj_align_to(row, anchor, LV_ALIGN_OUT_BOTTOM_LEFT, 0,
+                        shown ? 6 : 12);
+        anchor = row;
+        shown++;
+    }
+    if (!shown) {
+        lv_obj_t *none = lv_label_create(convoy_sheet);
+        lv_label_set_text(none, "nobody else heard yet - same code word?");
+        lv_obj_set_style_text_color(none, lv_color_hex(0x868E96), 0);
+        lv_obj_align_to(none, title, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 12);
+        anchor = none;
+    }
+
+    /* four taps, never typing: the whole convoy vocabulary */
+    lv_obj_t *prev = NULL;
+    for (int i = 0; i < CONVOY_PHRASES; i++) {
+        lv_obj_t *b = lv_button_create(convoy_sheet);
+        lv_obj_set_size(b, lv_pct(46), 46);
+        if (!prev)
+            lv_obj_align_to(b, anchor, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
+        else if (i % 2)
+            lv_obj_align_to(b, prev, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+        else
+            lv_obj_align_to(b, prev, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+        lv_obj_set_style_bg_color(b, lv_color_hex(0x2B3A55), 0);
+        lv_obj_add_event_cb(b, convoy_say_cb, LV_EVENT_CLICKED,
+                            (void *)convoy_phrases[i]);
+        lv_obj_t *l = lv_label_create(b);
+        lv_label_set_text(l, convoy_phrases[i]);
+        lv_obj_center(l);
+        prev = b;
+    }
+
+    lv_obj_t *lv_btn = lv_button_create(convoy_sheet);
+    lv_obj_set_size(lv_btn, lv_pct(46), 44);
+    lv_obj_align_to(lv_btn, prev, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
+    lv_obj_set_style_bg_color(lv_btn, lv_color_hex(0x3B2226), 0);
+    lv_obj_add_event_cb(lv_btn, convoy_leave_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *ll = lv_label_create(lv_btn);
+    lv_label_set_text(ll, "Leave convoy");
+    lv_obj_center(ll);
+
+    lv_obj_t *cl = lv_button_create(convoy_sheet);
+    lv_obj_set_size(cl, lv_pct(46), 44);
+    lv_obj_align_to(cl, lv_btn, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_set_style_bg_color(cl, lv_color_hex(0x22262E), 0);
+    lv_obj_add_event_cb(cl, convoy_sheet_close, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *cll = lv_label_create(cl);
+    lv_label_set_text(cll, "Close");
+    lv_obj_center(cll);
+}
+
 static void ui_tick_cb(lv_timer_t *t)
 {
     (void)t;
@@ -676,6 +798,14 @@ static void ui_tick_cb(lv_timer_t *t)
         if (m.msg_type == VMESH_MT_HELLO) {
             names_note(m.origin_id, m.note, now);
             continue;
+        }
+        if (m.msg_type == VMESH_MT_CONVOY) {
+            convoy_note(&m, scenario_own_origin(), now);
+            /* positions live in the member table; only our convoy's
+             * MESSAGES continue on to the store (chips + detail) */
+            if (!(convoy_is_ours(&m) &&
+                  m.hazard_type == CONVOY_SUB_MESSAGE))
+                continue;
         }
         if (m.msg_type == VMESH_MT_BEACON) {
             /* anchor presence: refresh the "town near" indicator.
@@ -716,6 +846,14 @@ static void ui_tick_cb(lv_timer_t *t)
     }
 
     hazard_store_prune(now, map_view_drop_chip);
+
+    /* convoy: own position on the air on a slow cadence, and age out
+     * members (and the convoy itself) that have gone quiet */
+    convoy_prune(now);
+    if (convoy_beacon_due(now)) {
+        vmesh_msg_t cb;
+        if (convoy_make_beacon(&cb)) vmesh_feed_publish(&cb);
+    }
 
     /* HELLO cadence: our handle onto the air shortly after boot (radio
      * is up by then), then every 10 min. Silent if no handle is set. */
@@ -865,6 +1003,19 @@ static void ui_tick_cb(lv_timer_t *t)
             }
         }
 
+        /* convoy chip: members heard, tap for the sheet */
+        {
+            char ctxt[32] = "";
+            if (convoy_active())
+                snprintf(ctxt, sizeof(ctxt), LV_SYMBOL_SHUFFLE " convoy %d",
+                         convoy_count());
+            static char cprev[32];
+            if (strcmp(cprev, ctxt) != 0) {
+                snprintf(cprev, sizeof(cprev), "%s", ctxt);
+                lv_label_set_text(lbl_convoy, ctxt);
+            }
+        }
+
         static char wprev[40];
         if (strcmp(wprev, wtxt) != 0) {
             strcpy(wprev, wtxt);
@@ -908,6 +1059,14 @@ void ui_init(void)
     lv_obj_add_flag(lbl_radios, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(lbl_radios, 12);
     lv_obj_add_event_cb(lbl_radios, about_open_cb, LV_EVENT_CLICKED, NULL);
+
+    lbl_convoy = lv_label_create(status_bar); /* convoy chip */
+    lv_label_set_text(lbl_convoy, "");
+    lv_obj_set_style_text_color(lbl_convoy, lv_color_hex(0x8AB4F8), 0);
+    lv_obj_align(lbl_convoy, LV_ALIGN_LEFT_MID, 560, 0);
+    lv_obj_add_flag(lbl_convoy, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(lbl_convoy, 14);
+    lv_obj_add_event_cb(lbl_convoy, convoy_sheet_open, LV_EVENT_CLICKED, NULL);
 
     lbl_town = lv_label_create(status_bar); /* anchor presence */
     lv_label_set_text(lbl_town, "");
