@@ -746,29 +746,33 @@ static void convoy_sheet_open(lv_event_t *e)
         anchor = none;
     }
 
-    /* four taps, never typing: the whole convoy vocabulary */
-    lv_obj_t *prev = NULL;
+    /* four taps, never typing: the whole convoy vocabulary.
+     * Two columns — each row's LEFT button anchors the next row (a
+     * chain off the right-hand button walks the layout off-sheet). */
+    lv_obj_t *row_left = NULL;
     for (int i = 0; i < CONVOY_PHRASES; i++) {
         lv_obj_t *b = lv_button_create(convoy_sheet);
-        lv_obj_set_size(b, lv_pct(46), 46);
-        if (!prev)
-            lv_obj_align_to(b, anchor, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
-        else if (i % 2)
-            lv_obj_align_to(b, prev, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
-        else
-            lv_obj_align_to(b, prev, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+        lv_obj_set_size(b, lv_pct(44), 46);
+        if (i % 2 == 0) {
+            if (!row_left)
+                lv_obj_align_to(b, anchor, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
+            else
+                lv_obj_align_to(b, row_left, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+            row_left = b;
+        } else {
+            lv_obj_align_to(b, row_left, LV_ALIGN_OUT_RIGHT_MID, 8, 0);
+        }
         lv_obj_set_style_bg_color(b, lv_color_hex(0x2B3A55), 0);
         lv_obj_add_event_cb(b, convoy_say_cb, LV_EVENT_CLICKED,
                             (void *)convoy_phrases[i]);
         lv_obj_t *l = lv_label_create(b);
         lv_label_set_text(l, convoy_phrases[i]);
         lv_obj_center(l);
-        prev = b;
     }
 
     lv_obj_t *lv_btn = lv_button_create(convoy_sheet);
-    lv_obj_set_size(lv_btn, lv_pct(46), 44);
-    lv_obj_align_to(lv_btn, prev, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
+    lv_obj_set_size(lv_btn, lv_pct(44), 44);
+    lv_obj_align_to(lv_btn, row_left, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 16);
     lv_obj_set_style_bg_color(lv_btn, lv_color_hex(0x3B2226), 0);
     lv_obj_add_event_cb(lv_btn, convoy_leave_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_t *ll = lv_label_create(lv_btn);
@@ -776,8 +780,8 @@ static void convoy_sheet_open(lv_event_t *e)
     lv_obj_center(ll);
 
     lv_obj_t *cl = lv_button_create(convoy_sheet);
-    lv_obj_set_size(cl, lv_pct(46), 44);
-    lv_obj_align_to(cl, lv_btn, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_set_size(cl, lv_pct(44), 44);
+    lv_obj_align_to(cl, lv_btn, LV_ALIGN_OUT_RIGHT_MID, 8, 0);
     lv_obj_set_style_bg_color(cl, lv_color_hex(0x22262E), 0);
     lv_obj_add_event_cb(cl, convoy_sheet_close, LV_EVENT_CLICKED, NULL);
     lv_obj_t *cll = lv_label_create(cl);
