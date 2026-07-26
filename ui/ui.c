@@ -725,7 +725,8 @@ static void convoy_sheet_open(lv_event_t *e)
         const char *nm = names_get(mb->origin, now);
         char idbuf[12];
         if (!nm) {
-            snprintf(idbuf, sizeof(idbuf), "%06X", mb->origin & 0xFFFFFF);
+            snprintf(idbuf, sizeof(idbuf), "%06X",
+                     (unsigned)(mb->origin & 0xFFFFFF));
             nm = idbuf;
         }
         lv_obj_t *row = lv_label_create(convoy_sheet);
