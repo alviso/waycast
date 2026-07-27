@@ -7,6 +7,7 @@
  * scale use; the product path is self-hosted tiles (PMTiles-style).
  */
 
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -149,6 +150,11 @@ static bool http_get_to_file(const char *base, const char *url,
         char tmp[136];
         snprintf(tmp, sizeof(tmp), "%s.part", path);
         FILE *f = fopen(tmp, "wb");
+        if (!f) {
+            static int logged;
+            if (logged++ < 3)
+                ESP_LOGW(TAG, "fopen %s failed errno=%d", tmp, errno);
+        }
         if (f) {
             int r;
             ok = true;
@@ -178,8 +184,11 @@ static int fetch_one(int z, int x, int y, char *buf, size_t bufsz)
     struct stat st;
     if (stat(path, &st) == 0 && st.st_size > 0) return 2; /* have it */
 
-    /* mkdir -p {root}/{z}/{x} */
+    /* mkdir -p {root}/{z}/{x} — including {root} itself: a fresh
+     * card has no tiles/ dir, and without this EVERY write failed
+     * (board #1's card was pre-loaded from the Mac, which hid it) */
     char dir[128];
+    mkdir(s_root, 0777);
     snprintf(dir, sizeof(dir), "%s/%d", s_root, z);
     mkdir(dir, 0777);
     snprintf(dir, sizeof(dir), "%s/%d/%d", s_root, z, x);
