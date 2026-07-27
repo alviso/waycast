@@ -1,56 +1,4 @@
 dependencies:
-  cfscn/esp32_p4_module_dev_kit:
-    component_hash: d7574697dbd1cfb83473f2c4e3593becd7dda306ce5ed177584dca7b438b63e9
-    dependencies:
-    - name: espressif/esp_codec_dev
-      registry_url: https://components.espressif.com
-      require: public
-      version: 1.2.*
-    - name: espressif/esp_lcd_touch_gt911
-      registry_url: https://components.espressif.com
-      require: private
-      version: ^1
-    - name: espressif/esp_lcd_st7701
-      registry_url: https://components.espressif.com
-      require: private
-      version: ^1.1.3
-    - name: espressif/esp_lvgl_port
-      registry_url: https://components.espressif.com
-      require: public
-      version: ^2
-    - name: idf
-      require: private
-      version: '>=5.3'
-    - name: lvgl/lvgl
-      registry_url: https://components.espressif.com
-      require: private
-      version: '>=8,<10'
-    - name: waveshare/esp_lcd_dsi
-      registry_url: https://components.espressif.com
-      require: private
-      version: '*'
-    - name: waveshare/esp_lcd_hx8394
-      registry_url: https://components.espressif.com
-      require: private
-      version: ^1.0.2
-    - name: waveshare/esp_lcd_ili9881c
-      registry_url: https://components.espressif.com
-      require: private
-      version: '*'
-    - name: waveshare/esp_lcd_jd9365_10_1
-      registry_url: https://components.espressif.com
-      require: private
-      version: '*'
-    - name: waveshare/esp_lcd_jd9365_8
-      registry_url: https://components.espressif.com
-      require: private
-      version: '*'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    targets:
-    - esp32p4
-    version: 1.1.8
   cfscn/esp_lcd_touch_ft6x36:
     component_hash: 19c3660866563c6a7d04c66ffef7099bcb57cd4c4766072bbd99b73762850f9a
     dependencies:
@@ -96,7 +44,7 @@ dependencies:
       require: private
       version: '>=4.0'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.2.0
   espressif/esp_hosted:
@@ -120,7 +68,7 @@ dependencies:
       require: private
       version: '>5.0.4,!=5.1.1'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32s3
@@ -147,7 +95,7 @@ dependencies:
       require: private
       version: '>=5.2'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.2.0~2
   espressif/esp_lvgl_port:
@@ -161,7 +109,7 @@ dependencies:
       require: public
       version: '>=8,<10'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 2.8.0~1
   espressif/esp_serial_slave_link:
@@ -314,7 +262,7 @@ dependencies:
     component_hash: 184e532558c1c45fefed631f3e235423d22582aafb4630f3e8885c35281a49ae
     dependencies: []
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 9.5.0
   waveshare/esp_lcd_dsi:
@@ -332,7 +280,7 @@ dependencies:
       require: private
       version: '>=5.3'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32p4
@@ -352,7 +300,7 @@ dependencies:
       require: private
       version: '>=5.3'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32p4
@@ -372,7 +320,7 @@ dependencies:
       require: private
       version: '>=5.3'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32p4
@@ -392,7 +340,7 @@ dependencies:
       require: private
       version: '>=5.3'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32p4
@@ -412,15 +360,18 @@ dependencies:
       require: private
       version: '>=5.3'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32p4
     version: 2.0.0
 direct_dependencies:
-- cfscn/esp32_p4_module_dev_kit
 - cfscn/esp_lcd_touch_ft6x36
+- espressif/esp_codec_dev
 - espressif/esp_hosted
+- espressif/esp_lcd_st7701
+- espressif/esp_lcd_touch_gt911
+- espressif/esp_lvgl_port
 - espressif/esp_wifi_remote
 - espressif/usb_host_cdc_acm
 - espressif/usb_host_ch34x_vcp
@@ -429,6 +380,12 @@ direct_dependencies:
 - espressif/usb_host_vcp
 - idf
 - jgromes/radiolib
-manifest_hash: f2ad03c9644dbe8b1f82303084084e68a87de80bc267c832621a146589434c06
+- lvgl/lvgl
+- waveshare/esp_lcd_dsi
+- waveshare/esp_lcd_hx8394
+- waveshare/esp_lcd_ili9881c
+- waveshare/esp_lcd_jd9365_10_1
+- waveshare/esp_lcd_jd9365_8
+manifest_hash: f6b57407142b950b4b99ea26d569af7732db7bfc6a59c3d1527a4a0a413b9fbb
 target: esp32p4
 version: 2.0.0
