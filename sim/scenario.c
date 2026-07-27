@@ -266,6 +266,8 @@ void vmesh_time_set_live(uint32_t unix_s)
     s_gps_at_clk = S.clock_s;
 }
 
+bool vmesh_time_live(void) { return s_gps_unix != 0; }
+
 uint32_t vmesh_time_s(void)
 {
     /* anchor + elapsed: sources may update rarely (GPS ~1 Hz, a town

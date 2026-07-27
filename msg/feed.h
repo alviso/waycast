@@ -29,6 +29,10 @@ uint32_t vmesh_time_s(void);
  * timestamp so a real-clock town node accepts them. Refresh each fix. */
 void vmesh_time_set_live(uint32_t unix_s);
 
+/* True once any real time source (GPS or an anchor beacon) has set the
+ * clock. Gate for anything that shows wall time to a human. */
+bool vmesh_time_live(void);
+
 /* ---- live-hardware hooks (USB GPS / USB LoRa transports) ----
  * Callable from a different task than the UI: single-producer,
  * single-consumer semantics per hook. */

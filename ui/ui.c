@@ -792,6 +792,32 @@ static void convoy_sheet_open(lv_event_t *e)
     lv_obj_center(cll);
 }
 
+/* ---- dash clock timezone ----------------------------------------
+ * No tz database on board; a solar zone (round lon/15) plus one DST
+ * hour in northern summer is right almost everywhere Waycast nodes
+ * live, almost all year. Longitude comes from the GPS pose or, indoors,
+ * from the town anchor's beacon — same sources that set the clock. */
+static float s_tz_lon, s_tz_lat;
+static bool  s_tz_known;
+
+static int tz_offset_min(uint32_t utc)
+{
+    float lon = s_tz_known ? s_tz_lon : 0.0f;
+    int off = (int)(lon / 15.0f + (lon >= 0 ? 0.5f : -0.5f)) * 60;
+    /* month via civil-from-days (Hinnant); DST at day granularity —
+     * the boundary Sundays are off by design, it's a dash clock */
+    int32_t  z   = (int32_t)(utc / 86400u) + 719468;
+    int32_t  era = (z >= 0 ? z : z - 146096) / 146097;
+    uint32_t doe = (uint32_t)(z - era * 146097);
+    uint32_t yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+    uint32_t doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    uint32_t mp  = (5 * doy + 2) / 153;
+    uint32_t mon = mp < 10 ? mp + 3 : mp - 9;
+    if (s_tz_known && s_tz_lat > 0 && mon >= 4 && mon <= 10)
+        off += 60;
+    return off;
+}
+
 static void ui_tick_cb(lv_timer_t *t)
 {
     (void)t;
@@ -843,6 +869,11 @@ static void ui_tick_cb(lv_timer_t *t)
             s_anchor_heard_ms = lv_tick_get();
             snprintf(s_anchor_name, sizeof(s_anchor_name), "%.23s",
                      m.note[0] ? m.note : "town");
+            if (m.lat_e7 || m.lon_e7) { /* tz from the anchor, indoors */
+                s_tz_lon = m.lon_e7 / 1e7f;
+                s_tz_lat = m.lat_e7 / 1e7f;
+                s_tz_known = true;
+            }
             continue;
         }
         if (m.origin_id == scenario_own_origin() && m.hops > 0) {
@@ -961,8 +992,21 @@ static void ui_tick_cb(lv_timer_t *t)
 
     lv_label_set_text_fmt(lbl_speed_big, "%d",
                           (int)(pose.speed_mps * 2.23694f));
-    float c = scenario_clock_s();
-    lv_label_set_text_fmt(lbl_clock, "%d:%02d", (int)c / 60, (int)c % 60);
+    if (vmesh_pose_is_live()) { /* GPS beats the anchor for tz too */
+        s_tz_lon = (float)pose.lon;
+        s_tz_lat = (float)pose.lat;
+        s_tz_known = true;
+    }
+    if (vmesh_time_live()) { /* wall clock (Peter: convenience) */
+        int64_t loc = (int64_t)vmesh_time_s() +
+                      60 * tz_offset_min(vmesh_time_s());
+        uint32_t hm = (uint32_t)(((loc % 86400) + 86400) % 86400) / 60u;
+        lv_label_set_text_fmt(lbl_clock, "%u:%02u", hm / 60, hm % 60);
+    } else { /* no real time source yet: uptime, as before */
+        float c = scenario_clock_s();
+        lv_label_set_text_fmt(lbl_clock, "%d:%02d",
+                              (int)c / 60, (int)c % 60);
+    }
 
     /* status-bar badges: GPS (pose source) and Wi-Fi, each with its own
      * icon + color; change-detected so labels only invalidate on real
