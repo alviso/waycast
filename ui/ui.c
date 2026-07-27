@@ -799,9 +799,13 @@ static void convoy_sheet_open(lv_event_t *e)
  * from the town anchor's beacon — same sources that set the clock. */
 static float s_tz_lon, s_tz_lat;
 static bool  s_tz_known;
+static int   s_tz_pub_min;   /* offset published by the anchor: the Pi
+                              * has a real tz database, DST included */
+static bool  s_tz_pub_known;
 
 static int tz_offset_min(uint32_t utc)
 {
+    if (s_tz_pub_known) return s_tz_pub_min;
     float lon = s_tz_known ? s_tz_lon : 0.0f;
     int off = (int)(lon / 15.0f + (lon >= 0 ? 0.5f : -0.5f)) * 60;
     /* month via civil-from-days (Hinnant); DST at day granularity —
@@ -869,6 +873,10 @@ static void ui_tick_cb(lv_timer_t *t)
             s_anchor_heard_ms = lv_tick_get();
             snprintf(s_anchor_name, sizeof(s_anchor_name), "%.23s",
                      m.note[0] ? m.note : "town");
+            if (m.hazard_type) { /* published tz: ¼-h units, +64 */
+                s_tz_pub_min = ((int)m.hazard_type - 64) * 15;
+                s_tz_pub_known = true;
+            }
             if (m.lat_e7 || m.lon_e7) { /* tz from the anchor, indoors */
                 s_tz_lon = m.lon_e7 / 1e7f;
                 s_tz_lat = m.lat_e7 / 1e7f;

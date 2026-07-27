@@ -1,3 +1,4 @@
+#define _GNU_SOURCE /* tm_gmtoff — the beacon publishes local tz */
 /* vmesh_peer — Waycast mesh peer for Raspberry Pi + SX1302 concentrator
  * (RAK2287 SPI / similar), via Semtech's sx1302_hal (libloragw).
  *
@@ -398,6 +399,17 @@ int main(int argc, char **argv)
                 b.lat_e7 = (int32_t)(g_lat * 1e7);
                 b.lon_e7 = (int32_t)(g_lon * 1e7);
                 b.created_s = (uint32_t)time(NULL);
+                /* TOWN-AS-TIMESERVER: created_s is our UTC (NTP/GNSS);
+                 * the spare hazard_type byte carries the local UTC
+                 * offset (quarter-hours, +64 bias — 0 = "not
+                 * published", what older peers send). The Pi has a
+                 * real tz database, so devices get DST for free. */
+                {
+                    struct tm lt;
+                    localtime_r(&last_beacon, &lt);
+                    b.hazard_type =
+                        (uint8_t)(64 + lt.tm_gmtoff / 900);
+                }
                 b.ttl_s = 150;          /* ~2 missed beacons then stale */
                 b.radius_m_x10 = 500;   /* the town, 5 km */
                 snprintf(b.note, sizeof(b.note), "%s", g_name);
