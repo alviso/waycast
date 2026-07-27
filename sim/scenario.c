@@ -259,11 +259,19 @@ void vmesh_feed_publish(const vmesh_msg_t *m)
  * real-clock town node rejects them as long-expired. Refreshed every
  * RMC (~1 Hz); 0 = no GPS time yet, fall back to the sim epoch. */
 static volatile uint32_t s_gps_unix;
-void vmesh_time_set_live(uint32_t unix_s) { s_gps_unix = unix_s; }
+static volatile float s_gps_at_clk; /* S.clock_s when the anchor was set */
+void vmesh_time_set_live(uint32_t unix_s)
+{
+    s_gps_unix = unix_s;
+    s_gps_at_clk = S.clock_s;
+}
 
 uint32_t vmesh_time_s(void)
 {
-    if (s_gps_unix) return s_gps_unix;
+    /* anchor + elapsed: sources may update rarely (GPS ~1 Hz, a town
+     * beacon 1/min) — the clock coasts between updates either way */
+    if (s_gps_unix)
+        return s_gps_unix + (uint32_t)(S.clock_s - s_gps_at_clk);
     return SIM_EPOCH + (uint32_t)S.clock_s;
 }
 

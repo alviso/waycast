@@ -799,6 +799,17 @@ static void ui_tick_cb(lv_timer_t *t)
 
     vmesh_msg_t m;
     while (vmesh_feed_poll(&m)) {
+        /* ANCHOR-AS-TIMESERVER (Peter, July 26): town beacons are
+         * stamped with the node's GNSS/NTP clock. A device with no
+         * GPS lock adopts it — read BEFORE normalization rewrites
+         * the stamp with our own (possibly sim-epoch) clock. Live
+         * GPS always wins; sanity floor rejects clockless anchors. */
+        if (m.msg_type == VMESH_MT_BEACON &&
+            vmesh_gps_state() != 2 && m.created_s > 1700000000u) {
+            vmesh_time_set_live(m.created_s);
+            now = vmesh_time_s();
+        }
+
         /* clock-skew repair before anything judges ages (see
          * vmesh_clock_normalize — receivers trust reception time
          * over implausible sender stamps) */
