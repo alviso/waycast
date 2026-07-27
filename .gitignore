@@ -16,3 +16,5 @@ targets/esp32p4/main/tile_server.h
 server/cache/
 assets_region/
 __pycache__/
+targets/esp32p4/build-devkit-c/
+targets/esp32p4/sdkconfig.devkit-c
