@@ -147,8 +147,15 @@ static bool http_get_to_file(const char *base, const char *url,
     if (esp_http_client_open(s_cli, 0) == ESP_OK &&
         esp_http_client_fetch_headers(s_cli) >= 0 &&
         esp_http_client_get_status_code(s_cli) == 200) {
+        /* 8.3-safe tmp name in the SAME dir (FATFS here is
+         * LFN_NONE: "123.png.part" is an invalid name and fopen
+         * fails before the card is even touched — bug #2 hiding
+         * behind the missing-root bug #1). One download task, so a
+         * single well-known name per dir is race-free. */
         char tmp[136];
-        snprintf(tmp, sizeof(tmp), "%s.part", path);
+        const char *sl = strrchr(path, '/');
+        snprintf(tmp, sizeof(tmp), "%.*s/t.tmp",
+                 (int)(sl - path), path);
         FILE *f = fopen(tmp, "wb");
         if (!f) {
             static int logged;
