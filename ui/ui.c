@@ -42,6 +42,8 @@ static lv_obj_t *report_overlay; /* S2 */
 static lv_obj_t *detail_panel;   /* S3 */
 static lv_obj_t *about_overlay;  /* S5 */
 static lv_obj_t *lbl_convoy;     /* status-bar convoy chip */
+static char s_convoy_ticker[40]; /* latest group message, 60 s */
+static uint32_t s_convoy_ticker_ms;
 static lv_obj_t *convoy_sheet;   /* member list + quick words */
 
 #define VMESH_FW_VERSION "0.1.0-phase0"
@@ -730,8 +732,9 @@ static void convoy_sheet_open(lv_event_t *e)
             nm = idbuf;
         }
         lv_obj_t *row = lv_label_create(convoy_sheet);
+        uint32_t ago = lv_tick_get() / 1000u - mb->heard_s;
         lv_label_set_text_fmt(row, LV_SYMBOL_GPS "  %s - %s (%us ago)",
-                              nm, dist, (unsigned)(now - mb->heard_s));
+                              nm, dist, (unsigned)ago);
         lv_obj_set_style_text_color(row, lv_color_hex(0xADB5BD), 0);
         lv_obj_align_to(row, anchor, LV_ALIGN_OUT_BOTTOM_LEFT, 0,
                         shown ? 6 : 12);
@@ -806,6 +809,14 @@ static void ui_tick_cb(lv_timer_t *t)
         }
         if (m.msg_type == VMESH_MT_CONVOY) {
             convoy_note(&m, scenario_own_origin(), now);
+            if (convoy_is_ours(&m) &&
+                m.hazard_type == CONVOY_SUB_MESSAGE &&
+                m.origin_id != scenario_own_origin()) {
+                const char *who = names_get(m.origin_id, now);
+                snprintf(s_convoy_ticker, sizeof(s_convoy_ticker),
+                         "%s: %.20s", who ? who : "convoy", m.note + 8);
+                s_convoy_ticker_ms = lv_tick_get();
+            }
             /* positions live in the member table; only our convoy's
              * MESSAGES continue on to the store (chips + detail) */
             if (!(convoy_is_ours(&m) &&
@@ -1012,11 +1023,16 @@ static void ui_tick_cb(lv_timer_t *t)
 
         /* convoy chip: members heard, tap for the sheet */
         {
-            char ctxt[32] = "";
-            if (convoy_active())
+            char ctxt[56] = "";
+            bool fresh_msg = s_convoy_ticker_ms &&
+                             lv_tick_elaps(s_convoy_ticker_ms) < 60000;
+            if (convoy_active() && fresh_msg)
+                snprintf(ctxt, sizeof(ctxt), LV_SYMBOL_SHUFFLE " %s",
+                         s_convoy_ticker);
+            else if (convoy_active())
                 snprintf(ctxt, sizeof(ctxt), LV_SYMBOL_SHUFFLE " convoy %d",
                          convoy_count());
-            static char cprev[32];
+            static char cprev[56];
             if (strcmp(cprev, ctxt) != 0) {
                 snprintf(cprev, sizeof(cprev), "%s", ctxt);
                 lv_label_set_text(lbl_convoy, ctxt);

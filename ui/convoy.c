@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "feed.h"
+#include "lvgl.h" /* lv_tick: monotonic, jump-proof */
 #include "scenario.h" /* scenario_stamp_own — own identity + seq */
 
 const char *const convoy_phrases[CONVOY_PHRASES] = {
@@ -16,6 +17,11 @@ void __attribute__((weak)) waycast_save_convoy(const char *phrase)
 {
     (void)phrase;
 }
+
+/* monotonic seconds since boot — membership/aging must survive the
+ * wall clock jumping forward when GPS first locks (it purged the
+ * whole member table on the bench, July 26) */
+static uint32_t mono_s(void) { return lv_tick_get() / 1000u; }
 
 static uint32_t s_group;              /* 0 = not in a convoy */
 static char     s_phrase[24];
@@ -41,11 +47,12 @@ uint32_t convoy_code_id(const char *phrase)
 
 void convoy_join(const char *phrase, uint32_t now_s)
 {
+    (void)now_s; /* kept for API stability; aging is monotonic now */
     if (!phrase || !phrase[0]) { convoy_leave(); return; }
     s_group = convoy_code_id(phrase);
     snprintf(s_phrase, sizeof(s_phrase), "%s", phrase);
     memset(s_mem, 0, sizeof(s_mem));
-    s_last_traffic_s = now_s;
+    s_last_traffic_s = mono_s();
     s_last_beacon_s = 0; /* beacon immediately: announce yourself */
     waycast_save_convoy(s_phrase);
 }
@@ -76,8 +83,8 @@ bool convoy_note(const vmesh_msg_t *m, uint32_t own_origin, uint32_t now_s)
     if (!s_group || m->msg_type != VMESH_MT_CONVOY) return false;
     if (note_group(m) != s_group) return false; /* someone else's convoy */
     if (m->origin_id == own_origin) return true; /* our own loopback */
-
-    s_last_traffic_s = now_s;
+    (void)now_s;
+    s_last_traffic_s = mono_s();
     if (m->hazard_type != CONVOY_SUB_POSITION)
         return false; /* a group message — caller shows it */
 
@@ -91,7 +98,7 @@ bool convoy_note(const vmesh_msg_t *m, uint32_t own_origin, uint32_t now_s)
     s_mem[slot].origin = m->origin_id;
     s_mem[slot].lat = m->lat_e7 / 1e7;
     s_mem[slot].lon = m->lon_e7 / 1e7;
-    s_mem[slot].heard_s = now_s;
+    s_mem[slot].heard_s = mono_s();
     return true;
 }
 
@@ -120,27 +127,31 @@ bool convoy_make_message(vmesh_msg_t *out, const char *text)
     stamp_convoy(out, CONVOY_SUB_MESSAGE);
     snprintf(out->note + 8, sizeof(out->note) - 8, "%s",
              text ? text : "");
-    s_last_traffic_s = out->created_s;
+    s_last_traffic_s = mono_s();
     return true;
 }
 
 bool convoy_beacon_due(uint32_t now_s)
 {
+    (void)now_s;
     if (!s_group) return false;
-    if (s_last_beacon_s && now_s - s_last_beacon_s < CONVOY_BEACON_S)
+    uint32_t m = mono_s();
+    if (s_last_beacon_s && m - s_last_beacon_s < CONVOY_BEACON_S)
         return false;
-    s_last_beacon_s = now_s ? now_s : 1;
+    s_last_beacon_s = m ? m : 1;
     return true;
 }
 
 void convoy_prune(uint32_t now_s)
 {
+    (void)now_s;
     if (!s_group) return;
+    uint32_t m = mono_s();
     for (int i = 0; i < CONVOY_MAX; i++)
-        if (s_mem[i].origin && now_s - s_mem[i].heard_s > CONVOY_MEMBER_TTL)
+        if (s_mem[i].origin && m - s_mem[i].heard_s > CONVOY_MEMBER_TTL)
             memset(&s_mem[i], 0, sizeof(s_mem[i]));
     /* a trip, not a club: a convoy nobody has spoken in dissolves */
-    if (s_last_traffic_s && now_s - s_last_traffic_s > CONVOY_IDLE_TTL)
+    if (s_last_traffic_s && m - s_last_traffic_s > CONVOY_IDLE_TTL)
         convoy_leave();
 }
 
