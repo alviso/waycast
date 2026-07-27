@@ -274,10 +274,16 @@ static void poll_cb(lv_timer_t *t)
     if (td) {
         int done = 0, total = 0;
         vmesh_tiledl_state_t st = td->progress(&done, &total);
+        const char *det = td->detail ? td->detail() : NULL;
         if (st == VMESH_TILEDL_RUNNING && total > 0) {
             lv_bar_set_range(s_dl_bar, 0, total);
             lv_bar_set_value(s_dl_bar, done, LV_ANIM_OFF);
-            lv_label_set_text_fmt(s_dl_lbl, "%d / %d tiles", done, total);
+            if (det)
+                lv_label_set_text_fmt(s_dl_lbl, "%d / %d  (%s)",
+                                      done, total, det);
+            else
+                lv_label_set_text_fmt(s_dl_lbl, "%d / %d tiles",
+                                      done, total);
         } else if (st == VMESH_TILEDL_DONE) {
             lv_bar_set_value(s_dl_bar, total ? total : 1, LV_ANIM_OFF);
             static bool healed;

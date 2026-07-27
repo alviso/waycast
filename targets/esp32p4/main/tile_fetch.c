@@ -38,6 +38,7 @@ static const char *TAG = "vmesh-tiledl";
 
 static char s_root[64]; /* e.g. /sdcard/tiles — writable card only */
 static volatile int s_done, s_total;
+static volatile int s_new, s_have, s_fail; /* per-run outcome counts */
 static volatile vmesh_tiledl_state_t s_state = VMESH_TILEDL_IDLE;
 static volatile bool s_cancel;
 static double s_bbox[4]; /* latmin, latmax, lonmin, lonmax */
@@ -145,7 +146,9 @@ static bool http_get_to_file(const char *base, const char *url,
     if (esp_http_client_open(s_cli, 0) == ESP_OK &&
         esp_http_client_fetch_headers(s_cli) >= 0 &&
         esp_http_client_get_status_code(s_cli) == 200) {
-        FILE *f = fopen(path, "wb");
+        char tmp[136];
+        snprintf(tmp, sizeof(tmp), "%s.part", path);
+        FILE *f = fopen(tmp, "wb");
         if (f) {
             int r;
             ok = true;
@@ -157,7 +160,10 @@ static bool http_get_to_file(const char *base, const char *url,
             }
             if (r < 0) ok = false;
             fclose(f);
-            if (!ok) remove(path);
+            /* rename is the commit: a tile either fully exists or
+             * doesn't — a reboot mid-write can't poison the resume */
+            if (ok && rename(tmp, path) != 0) ok = false;
+            if (!ok) remove(tmp);
         }
     }
     if (!ok) keepalive_drop();
@@ -216,8 +222,13 @@ static void dl_task(void *arg)
                 if (s_ring_mode && !tile_in_ring(z, x, y, ring))
                     continue; /* outside the circle, not counted */
                 int r = fetch_one(z, x, y, buf, sizeof(buf));
-                if (r == 0) fails++;
+                if (r == 0) { fails++; s_fail++; }
+                else if (r == 1) s_new++;
+                else s_have++;
                 s_done++;
+                if (s_done % 250 == 0)
+                    ESP_LOGI(TAG, "%d/%d: %d new %d on-card %d failed",
+                             s_done, s_total, s_new, s_have, s_fail);
                 /* politeness is owed to OSM; our own server sets its
                  * own pace. already-on-card tiles cost nothing. */
                 if (r == 0 || (r == 1 && s_last_was_osm))
@@ -266,6 +277,7 @@ static bool op_start(double lat_min, double lat_max,
     s_bbox[2] = lon_min; s_bbox[3] = lon_max;
     s_ring_mode = false;
     s_done = 0;
+    s_new = s_have = s_fail = 0;
     s_total = total;
     s_cancel = false;
     s_state = VMESH_TILEDL_RUNNING;
@@ -302,6 +314,7 @@ static bool op_start_tier(double clat, double clon,
 
     s_ring_mode = true;
     s_done = 0;
+    s_new = s_have = s_fail = 0;
     s_total = total;
     s_state = VMESH_TILEDL_RUNNING;
     xTaskCreate(dl_task, "tiledl", 6144, NULL, 4, NULL);
@@ -319,11 +332,20 @@ static vmesh_tiledl_state_t op_progress(int *done, int *total)
 
 static void op_cancel(void) { s_cancel = true; }
 
+static const char *op_detail(void)
+{
+    static char buf[64];
+    snprintf(buf, sizeof(buf), "%d new / %d on card / %d failed",
+             s_new, s_have, s_fail);
+    return buf;
+}
+
 static const vmesh_tiledl_ops_t ops = {
     .start = op_start,
     .start_tier = op_start_tier,
     .progress = op_progress,
     .cancel = op_cancel,
+    .detail = op_detail,
 };
 
 /* root: the WRITABLE tile root (TF card), or NULL if only SPIFFS is

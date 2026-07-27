@@ -63,6 +63,10 @@ typedef struct {
     bool (*start_tier)(double clat, double clon, vmesh_tiles_tier_t tier);
     vmesh_tiledl_state_t (*progress)(int *done, int *total);
     void (*cancel)(void);
+    /* optional (may be NULL): human-readable breakdown of the run so
+     * far — "n new / n on card / n failed". A failing card writes was
+     * indistinguishable from a working download until the very end. */
+    const char *(*detail)(void);
 } vmesh_tiledl_ops_t;
 
 /* ---- OTA firmware update (docs/OTA.md; device-only, sim = NULL) ---- */
