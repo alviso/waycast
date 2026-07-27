@@ -3,7 +3,9 @@ dependencies:
   # BSP for the Waveshare ESP32-P4-Module-DEV-KIT: DSI display + GT9271
   # touch + esp_lvgl_port (pulls LVGL 9). Panel model is chosen in
   # menuconfig (Board Support Package -> Display).
-  cfscn/esp32_p4_module_dev_kit: "^1.1.8"
+  # BSP vendored into components/esp32_p4_module_dev_kit
+  # (July 26: needed a one-line fix for v3.1 silicon — the
+  # managed copy hardcoded the legacy DSI PHY clock source)
   # The BSP's CMake requires this touch driver but forgets to declare it
   # as a managed dependency — declare it here so resolution succeeds.
   # (Same author as the BSP publishes it.)

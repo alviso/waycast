@@ -1,0 +1,12 @@
+# ESP32-P4-WIFI6-DEV-KIT-C + 10.1" DSI-TOUCH-A panel (jd9365,
+# 800x1280 portrait-native — the panel announced its own ID over
+# DSI: 93 65 04). Overlays sdkconfig.defaults.
+CONFIG_BSP_LCD_TYPE_720_1280_7_INCH_A=n
+CONFIG_BSP_LCD_TYPE_800_1280_10_1_INCH_A=y
+
+# This board carries mass-production v3.1 silicon (the Module-DEV-KIT
+# overrides below are for its early v1.0 chip — undo them here).
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=n
+CONFIG_ESP32P4_REV_MIN_300=y
+CONFIG_VMESH_ROTATE_90=y
+CONFIG_VMESH_HW="esp32p4-wifi6-devkit-c"

@@ -14,6 +14,9 @@
 #include "esp_efuse.h"
 #include "esp_timer.h"
 #include "nvs.h"
+#include "nvs_flash.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "lvgl.h"
 
 #include <dirent.h>
@@ -240,6 +243,14 @@ static esp_err_t __attribute__((unused)) sd_try_mount(int width, int khz)
 }
 #endif
 
+static void wifi_up_task(void *arg)
+{
+    (void)arg;
+    extern void wifi_mgr_start(void);
+    wifi_mgr_start();
+    vTaskDelete(NULL); /* task functions must never return */
+}
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "vehicular-mesh phase 0 — scenario-driven UI");
@@ -307,9 +318,16 @@ void app_main(void)
     }
 #endif
 
-    extern void wifi_mgr_start(void);
-    ESP_LOGI(TAG, "start: wifi_mgr");
-    wifi_mgr_start();
+    /* NVS first (wifi_mgr used to do this implicitly; now that Wi-Fi
+     * is async, the boot path needs it before loading saved state) */
+    nvs_flash_init();
+
+    /* Wi-Fi bring-up in its OWN task: the display must never be
+     * hostage to a radio (lesson #1: HAT-off black screen; lesson #2:
+     * this board's C6 shipping without esp-hosted slave firmware hung
+     * the boot at the first RPC and kept the panel dark). */
+    ESP_LOGI(TAG, "start: wifi_mgr (async)");
+    xTaskCreate(wifi_up_task, "wifi_up", 8192, NULL, 5, NULL);
 
     /* DISPLAY BEFORE RADIO (July 23): radio bring-up blocks indefinitely
      * when the HAT is absent, which used to leave the screen black and
@@ -334,9 +352,19 @@ void app_main(void)
     bsp_display_backlight_on();
 
     bsp_display_lock(0);
-    /* panel is 720x1280 portrait-native; the device mounts landscape
-     * (270°, not 90°: USB connector ergonomics on the dev-kit stand) */
-    lv_display_set_rotation(lv_display_get_default(), LV_DISPLAY_ROTATION_270);
+    /* rotate only portrait-native panels (7" is 720x1280); landscape-
+     * native ones (10.1" C is 1280x800) render as-is. 270 not 90: USB
+     * connector ergonomics on the dev-kit stand. */
+    {
+        lv_display_t *d = lv_display_get_default();
+        if (lv_display_get_horizontal_resolution(d) <
+            lv_display_get_vertical_resolution(d))
+#if CONFIG_VMESH_ROTATE_90
+            lv_display_set_rotation(d, LV_DISPLAY_ROTATION_90);
+#else
+            lv_display_set_rotation(d, LV_DISPLAY_ROTATION_270);
+#endif
+    }
     scenario_set_demo(waycast_load_demo()); /* real mode unless saved on */
     scenario_set_own_seq(waycast_load_seq() + 4); /* +4: NVS-commit slack */
     {

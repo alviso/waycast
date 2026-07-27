@@ -105,6 +105,17 @@ static void fw_task(void *arg)
         return;
     }
 
+    /* hardware gate: an image for another board would boot, pass the
+     * self-check, and leave this panel dark forever */
+    const cJSON *jhw = cJSON_GetObjectItem(j, "hw");
+    if (cJSON_IsString(jhw) &&
+        strcmp(jhw->valuestring, CONFIG_VMESH_HW) != 0) {
+        set_status(FW_UPTODATE, "no build for this hardware yet", NULL);
+        cJSON_Delete(j);
+        vTaskDelete(NULL);
+        return;
+    }
+
     const char *cur = fw_update_version();
     if (strcmp(jver->valuestring, cur) == 0) {
         set_status(FW_UPTODATE, "up to date (%s)", cur);

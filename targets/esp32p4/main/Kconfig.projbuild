@@ -1,0 +1,26 @@
+menu "Waycast"
+
+    choice VMESH_ROTATION
+        prompt "Display rotation (portrait-native panels)"
+        default VMESH_ROTATE_270
+        help
+            Which landscape to make. Both DSI panels are portrait-
+            native; the right rotation depends on how the board
+            mounts. 7" kit stand: 270. WIFI6-DEV-KIT-C: 90.
+
+        config VMESH_ROTATE_270
+            bool "270 degrees"
+        config VMESH_ROTATE_90
+            bool "90 degrees"
+    endchoice
+
+    config VMESH_HW
+        string "Hardware identity (OTA gate)"
+        default "esp32p4-devkit"
+        help
+            Must match the manifest's "hw" field for an OTA to apply.
+            Prevents a build for one board from dark-bricking another
+            (a wrong-panel image boots fine and passes the rollback
+            self-check — the screen just never lights again).
+
+endmenu
