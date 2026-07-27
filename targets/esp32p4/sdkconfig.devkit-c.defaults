@@ -10,3 +10,10 @@ CONFIG_ESP32P4_SELECTS_REV_LESS_V3=n
 CONFIG_ESP32P4_REV_MIN_300=y
 CONFIG_VMESH_ROTATE_90=y
 CONFIG_VMESH_HW="esp32p4-wifi6-devkit-c"
+
+# July 26: OTA downloads crashed the board mid-flash at random progress
+# (device rebooted; caught on live console). Flash auto-suspend is
+# chip-specific ("READ DOCS" per Kconfig) and this board's NOR differs
+# from board #1's — disable it here. Cost: the OTA shroud flickers on
+# this board. The 7" keeps auto-suspend (proven calm there).
+CONFIG_SPI_FLASH_AUTO_SUSPEND=n
