@@ -30,7 +30,7 @@ enum {
                               (plan §7¾): ref_origin/ref_seq name the
                               target, hazard_type carries the verdict */
     VMESH_MT_CONVOY = 8,   /* trip-scoped group traffic (ui/convoy.h):
-                              ref_origin = group id (hashed code word),
+                              note = 8-hex group id prefix [+ text],
                               hazard_type = 0 position / 1 message */
     VMESH_MT_HELLO  = 7,   /* identity: note = the sender's handle
                               (§7¾ locally persistent pseudonym; a
@@ -81,8 +81,12 @@ enum {
 /* severity: 1 = info, 2 = caution, 3 = danger */
 
 /* types whose wire position slots carry a message reference instead */
-#define VMESH_MT_HAS_REF(t) ((t) == VMESH_MT_CONVOY || \
-                             (t) == VMESH_MT_ATTEST || \
+/* NOTE: CONVOY is deliberately NOT here — HAS_REF types overlay the
+ * ref fields onto the position/ttl bytes, and a convoy POSITION
+ * beacon without a position is a haiku, not a protocol (v0.8.1
+ * shipped that way; the town node's journal caught it: @0,0 ttl=0).
+ * Convoy group id rides as an 8-hex-char prefix in note instead. */
+#define VMESH_MT_HAS_REF(t) ((t) == VMESH_MT_ATTEST || \
                              (t) == VMESH_MT_QUERY  || \
                              (t) == VMESH_MT_REPLY)
 

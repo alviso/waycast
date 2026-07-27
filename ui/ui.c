@@ -811,6 +811,8 @@ static void ui_tick_cb(lv_timer_t *t)
             if (!(convoy_is_ours(&m) &&
                   m.hazard_type == CONVOY_SUB_MESSAGE))
                 continue;
+            /* drop the 8-hex group prefix — chips show clean text */
+            memmove(m.note, m.note + 8, sizeof(m.note) - 8);
         }
         if (m.msg_type == VMESH_MT_BEACON) {
             /* anchor presence: refresh the "town near" indicator.

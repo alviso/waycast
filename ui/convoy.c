@@ -1,6 +1,7 @@
 #include "convoy.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "feed.h"
@@ -60,10 +61,20 @@ void convoy_leave(void)
 bool convoy_active(void) { return s_group != 0; }
 const char *convoy_phrase(void) { return s_phrase; }
 
+/* group id = first 8 hex chars of note; 0 if malformed */
+static uint32_t note_group(const vmesh_msg_t *m)
+{
+    if (strnlen(m->note, 9) < 8) return 0;
+    char g[9];
+    memcpy(g, m->note, 8);
+    g[8] = 0;
+    return (uint32_t)strtoul(g, 0, 16);
+}
+
 bool convoy_note(const vmesh_msg_t *m, uint32_t own_origin, uint32_t now_s)
 {
     if (!s_group || m->msg_type != VMESH_MT_CONVOY) return false;
-    if (m->ref_origin != s_group) return false; /* someone else's convoy */
+    if (note_group(m) != s_group) return false; /* someone else's convoy */
     if (m->origin_id == own_origin) return true; /* our own loopback */
 
     s_last_traffic_s = now_s;
@@ -90,8 +101,8 @@ static void stamp_convoy(vmesh_msg_t *m, uint8_t sub)
     m->msg_type = VMESH_MT_CONVOY;
     m->channel = VMESH_CH_GROUP;
     m->hazard_type = sub;
-    m->ref_origin = s_group;
     m->severity = 1;
+    snprintf(m->note, sizeof(m->note), "%08X", (unsigned)s_group);
     m->radius_m_x10 = 2000;  /* 20 km: a convoy can string out          */
     m->ttl_s = 600;          /* positions are stale fast; messages too  */
 }
@@ -99,8 +110,7 @@ static void stamp_convoy(vmesh_msg_t *m, uint8_t sub)
 bool convoy_make_beacon(vmesh_msg_t *out)
 {
     if (!s_group) return false;
-    stamp_convoy(out, CONVOY_SUB_POSITION);
-    out->note[0] = 0;
+    stamp_convoy(out, CONVOY_SUB_POSITION); /* note = group prefix */
     return true;
 }
 
@@ -108,7 +118,8 @@ bool convoy_make_message(vmesh_msg_t *out, const char *text)
 {
     if (!s_group) return false;
     stamp_convoy(out, CONVOY_SUB_MESSAGE);
-    snprintf(out->note, sizeof(out->note), "%s", text ? text : "");
+    snprintf(out->note + 8, sizeof(out->note) - 8, "%s",
+             text ? text : "");
     s_last_traffic_s = out->created_s;
     return true;
 }
@@ -149,5 +160,5 @@ convoy_member_t *convoy_slot(int i)
 bool convoy_is_ours(const vmesh_msg_t *m)
 {
     return s_group && m->msg_type == VMESH_MT_CONVOY &&
-           m->ref_origin == s_group;
+           note_group(m) == s_group;
 }
