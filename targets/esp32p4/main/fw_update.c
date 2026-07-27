@@ -32,7 +32,10 @@
 
 #include "fw_update.h"
 
-#define MANIFEST_URL "https://waycast.io/fw/manifest.json"
+/* per-hardware manifest: each board type has its own release
+ * channel; one git tag releases all boards (docs/OTA.md) */
+#define MANIFEST_URL \
+    "https://waycast.io/fw/manifest-" CONFIG_VMESH_HW ".json"
 #define MANIFEST_MAX 1024
 
 static const char *TAG = "vmesh-fw";

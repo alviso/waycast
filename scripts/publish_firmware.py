@@ -24,7 +24,21 @@ import subprocess
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BIN = REPO / "targets/esp32p4/build/vmesh.bin"
+
+# one row per hardware type; a release = publishing every row
+BOARDS = {
+    "devkit": {
+        "hw": "esp32p4-devkit",
+        "build": "targets/esp32p4/build",
+        "legacy_alias": True,  # also write manifest.json (pre-v0.8.1
+                               # 7" devices still read it; drop later)
+    },
+    "devkit-c": {
+        "hw": "esp32p4-wifi6-devkit-c",
+        "build": "targets/esp32p4/build-devkit-c",
+        "legacy_alias": False,
+    },
+}
 BASTION = ["ssh", "-o", "ConnectTimeout=10", "Alviso99@80.240.18.30",
            "--", "kda-hetzner-1"]
 WEBROOT = "/var/www/waycast/fw"
@@ -44,11 +58,14 @@ def run_remote(cmd: str, stdin_bytes: bytes | None = None) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--board", choices=sorted(BOARDS), default="devkit")
     ap.add_argument("--channel", choices=["stable", "beta"],
                     default="stable")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
+    board = BOARDS[args.board]
+    BIN = REPO / board["build"] / "vmesh.bin"
     if not BIN.exists():
         sys.exit(f"no build at {BIN} — run idf.py build first")
 
@@ -67,15 +84,15 @@ def main() -> None:
     if ver.endswith("-dirty"):
         sys.exit("refusing to publish a -dirty build — commit first")
     sha = hashlib.sha256(blob).hexdigest()
-    binname = f"vmesh-{ver}.bin"
-    manifest_name = ("manifest.json" if args.channel == "stable"
-                     else "manifest-beta.json")
+    binname = f"vmesh-{board['hw']}-{ver}.bin"
+    suffix = "" if args.channel == "stable" else "-beta"
+    manifest_name = f"manifest-{board['hw']}{suffix}.json"
     manifest = json.dumps({
         "version": ver,
         "url": f"https://waycast.io/fw/{binname}",
         "size": len(blob),
         "sha256": sha,
-        "hw": "esp32p4-devkit",
+        "hw": board["hw"],
     }, indent=2) + "\n"
 
     print(f"version {ver}  ({len(blob)} bytes, sha256 {sha[:16]}...)")
@@ -97,7 +114,9 @@ def main() -> None:
         sys.exit(f"UPLOAD CORRUPT: remote hash mismatch\n{out}")
     run_remote(f"cat > {WEBROOT}/{manifest_name}",
                manifest.encode())
-    print("published + hash-verified.")
+    if board["legacy_alias"] and args.channel == "stable":
+        run_remote(f"cat > {WEBROOT}/manifest.json", manifest.encode())
+    print(f"published + hash-verified ({manifest_name}).")
 
 
 if __name__ == "__main__":
