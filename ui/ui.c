@@ -1001,7 +1001,8 @@ static void ui_tick_cb(lv_timer_t *t)
         int64_t loc = (int64_t)vmesh_time_s() +
                       60 * tz_offset_min(vmesh_time_s());
         uint32_t hm = (uint32_t)(((loc % 86400) + 86400) % 86400) / 60u;
-        lv_label_set_text_fmt(lbl_clock, "%u:%02u", hm / 60, hm % 60);
+        lv_label_set_text_fmt(lbl_clock, "%u:%02u",
+                              (unsigned)(hm / 60), (unsigned)(hm % 60));
     } else { /* no real time source yet: uptime, as before */
         float c = scenario_clock_s();
         lv_label_set_text_fmt(lbl_clock, "%d:%02d",
